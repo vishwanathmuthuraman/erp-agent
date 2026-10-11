@@ -1,23 +1,16 @@
-# Project working instructions
+# Repository working instructions
 
-This repository currently contains a build blueprint, data contracts and original synthetic examples. Read README.md and docs/01-product-requirements.md through docs/05-definition-of-done.md before implementing application behavior. The application is not implemented yet; proposed commands are not evidence that it runs.
+Read README.md, ENGINEERING.md, requirements, architecture, evaluation and definition of done before changing behavior. This repository currently contains research specifications, synthetic examples and documentation tooling; application implementation is pending.
 
-## Implementation workflow
+1. Follow public milestones in docs/03-build-plan.md. Detailed internal delivery planning is maintained separately; do not republish it.
+2. Preserve requirement identifiers, contracts, exact financial arithmetic, state rules and evaluation semantics. Record deliberate architecture changes before revising those boundaries.
+3. Implement one bounded behavior and record actual test evidence. Never turn planned work or expected scenario output into a completed result.
+4. Keep identity, permissions, money, approval binding and external effects deterministic. Optional model output is untrusted proposed input.
+5. Preserve organization boundaries, source versions, idempotency, explicit unknown outcomes and human review where relevant.
+6. Keep development examples separate from held-out cases. Do not expose expected labels, future facts or evaluator state to the system under test.
+7. Keep public changes scoped to synthetic research artifacts. Credentials, private affiliations, customer records, delivery estimates and commercial plans remain outside the public tree.
+8. Use the configured personal maintainer identity; preserve genuine human attribution and required source notices. Do not add assistant branding or automated assistant coauthor credits. Do not fabricate manual authorship, measured results, awards or endorsements.
+9. Run scripts/check_public_docs.py for documentation changes and the affected behavioral checks once application code exists. Documentation validation is not an application test.
+10. Follow docs/08-publication.md. A future architecture does not authorize connecting production systems, sending messages, financial actions, deployment or unrelated publication.
 
-1. Find the task tracker linked from README.md. Work on the earliest task whose dependencies are complete.
-2. Preserve functional requirement IDs, data contracts and evaluation definitions. Document any necessary design change and its consequences before revising a contract.
-3. Implement a bounded task and verify the acceptance behavior described in the build plan. Record actual evidence and actual status in the tracker.
-4. Use deterministic calculations and state rules for consequential decisions. Optional AI output must remain subject to validation, evidence checks and explicit failure handling.
-5. Keep development cases separate from held-out evaluation cases. Do not tune on held-out outcomes or expose expected labels to the system being evaluated.
-6. Distinguish documentation validation, implementation tests and measured benchmark results. Never fill a results table with invented runs or mark work complete because a document describes it.
-7. Follow docs/08-publication.md before release. A valid negative experiment can be reported honestly even if a stronger product-performance target is unmet.
-
-## Public repository boundary
-
-Use original synthetic data and authorized public sources. Keep credentials, customer records, private affiliations, interview notes, commercial plans and private working directories outside the repository. Briefly paraphrase and link public research; do not copy reports or claim source authors endorse this project. License decisions remain pending until explicitly recorded.
-
-Do not add remote integrations, send messages, make financial changes, publish a release or upload data merely because a future architecture describes those actions. Use only the current task's authorized scope.
-
-## Documentation
-
-The Markdown files are the editable source of truth. BLUEPRINT.html is an offline reading snapshot. Update its content when the underlying specification changes. Keep all actual source links relative and valid; use code formatting for paths to planned files that do not exist yet.
+Markdown is the editable source of truth. Existing public Git history remains historical evidence; normal file deletion does not erase prior access. License selection is pending.

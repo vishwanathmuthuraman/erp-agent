@@ -21,7 +21,7 @@ Missing a performance target does not justify changing labels, removing hard cas
 
 ## Requirement-to-test plan
 
-Names below designate tests to implement, not existing files or results. All map to future `tests/` modules described in the build plan.
+Names below designate tests to implement, not existing files or results. They describe acceptance evidence for the [public milestones](03-build-plan.md); no test modules exist yet.
 
 | Requirement | Planned smoke/positive test | Planned fault/negative test | False-positive or boundary check |
 | --- | --- | --- | --- |
@@ -43,11 +43,11 @@ Names below designate tests to implement, not existing files or results. All map
 ## Five-minute demonstration, after implementation
 
 1. State the scope: synthetic one-line purchasing workflow; no production certification.
-2. Run the future `erp-bench demo` command from [the build plan](03-build-plan.md). Display the manifest and environment.
+2. Run the future `erp-bench demo` interface target described in [the public milestones](03-build-plan.md). Display the manifest and environment.
 3. Open the clean retry: first response is lost, the agent reuses the key, and quantity moves from 10 to 13 once. All three suites should pass.
 4. Open the faulty retry: changed key produces quantity 16 and two business effects. Smoke should pass; state/hybrid should fail. Show the exact two records and retry events.
 5. Show one case for each remaining fault class and its clean counterpart; distinguish intentionally seeded defects from implementation errors.
 6. Open the release comparison; show one newly failing rule and one fixed rule without aggregating them away.
 7. End with measured counts, false alarms, incomplete evidence and simulator limitations. Do not substitute expected fixture values for observed output.
 
-Completion evidence goes into the tracker and release notes with artifact paths and hashes. A checked box without supporting output is insufficient.
+Completion evidence accompanies the [public milestones](03-build-plan.md) and release notes with artifact paths and hashes. A checked box without supporting output is insufficient.

@@ -37,3 +37,6 @@ build/
 .DS_Store
 .idea/
 .vscode/
+
+# Internal full handoff lives outside this public repository.
+BLUEPRINT.html
