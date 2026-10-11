@@ -1,6 +1,6 @@
 # Repository working instructions
 
-Read README.md, ENGINEERING.md, requirements, architecture, evaluation and definition of done before changing behavior. This repository currently contains research specifications, synthetic examples and documentation tooling; application implementation is pending.
+Read README.md, ENGINEERING.md, requirements, architecture, evaluation and definition of done before changing behavior. Initial offline components now exist; read docs/IMPLEMENTATION.md for verified behavior and remaining limits. The complete workflow and evaluation remain pending.
 
 1. Follow public milestones in docs/03-build-plan.md. Detailed internal delivery planning is maintained separately; do not republish it.
 2. Preserve requirement identifiers, contracts, exact financial arithmetic, state rules and evaluation semantics. Record deliberate architecture changes before revising those boundaries.

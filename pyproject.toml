@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools==80.10.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "erp-agent-testbench"
+version = "0.1.0"
+description = "Offline synthetic research components for erp-agent-testbench"
+requires-python = ">=3.12,<3.13"
+dependencies = ["jsonschema==4.26.0"]
+
+[project.scripts]
+erp-bench = "erp_agent_testbench.cli:main"
+
+[dependency-groups]
+dev = ["pytest==9.1.1", "ruff==0.16.6", "Markdown==3.10.3"]
+
+[tool.setuptools]
+packages = ["erp_agent_testbench", "erp_agent_testbench.schemas"]
+package-dir = {"erp_agent_testbench" = "src/erp_agent_testbench", "erp_agent_testbench.schemas" = "schemas"}
+
+[tool.setuptools.package-data]
+"erp_agent_testbench.schemas" = ["*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

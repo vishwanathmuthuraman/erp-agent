@@ -1,0 +1,51 @@
+{
+  "schema_version": "0.1",
+  "kind": "offline_retry_specimen",
+  "observation": {
+    "terminal_status": "completed",
+    "apply_attempts": 2,
+    "durable_operation_records": 1,
+    "commitment_records": 1,
+    "order_quantity": 13,
+    "commitment_total_minor": 3000,
+    "currency": "USD",
+    "target_quantity": 13,
+    "target_commitment_minor": 3000,
+    "events": [
+      {
+        "event_id": "tool-1",
+        "sequence": 1,
+        "tool": "apply_amendment",
+        "tick": 5,
+        "idempotency_key": "request-1",
+        "request_hash": "cc795b56b57990b8e291d7a44490f8b41b42be16d303032d49ef6720fc9a2276",
+        "operation_id": "op-example-001"
+      },
+      {
+        "event_id": "tool-2",
+        "sequence": 2,
+        "tool": "apply_amendment",
+        "tick": 6,
+        "idempotency_key": "request-1",
+        "request_hash": "cc795b56b57990b8e291d7a44490f8b41b42be16d303032d49ef6720fc9a2276",
+        "operation_id": "op-example-001"
+      }
+    ]
+  },
+  "suites": {
+    "smoke": {
+      "verdict": "pass",
+      "findings": []
+    },
+    "state": {
+      "verdict": "pass",
+      "findings": []
+    },
+    "hybrid": {
+      "verdict": "pass",
+      "findings": []
+    }
+  },
+  "external_agent_adapter_implemented": false,
+  "benchmark_executed": false
+}

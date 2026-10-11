@@ -3,12 +3,31 @@
 ![ERP Agent Testbench — Test the failure before it reaches the business.](docs/assets/overview.svg)
 
 [![Documentation integrity](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml)
+[![Implementation checks](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml)
 
 **How does an agent behave when an ERP workflow retries, partially fails or changes its contract?**
 
 Define a simulated purchase-order interface, inject controlled faults, and distinguish successful completion from dangerous or misleading success.
 
-**Stage: research specification.** This repository contains design work and synthetic examples. Application implementation and performance evaluation are pending; there is no working product or measured result yet.
+**Stage: initial offline implementation.** Runnable Python components, synthetic demos and behavioral tests are available. The complete workflow, predictive/model evaluation and production product remain pending.
+
+## Run the initial implementation
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run these commands from this repository. The runtime is pinned to Python 3.12.13; dependencies are pinned in `uv.lock`.
+
+```sh
+uv sync --locked
+uv run --locked erp-bench run examples/clean-retry.case.json
+uv run --locked pytest
+```
+
+The CLI prints JSON. `validate` checks the same input contract; invalid or unsupported input returns exit code 2 with a JSON error on stderr. Successful inspection returns exit code 0. A seeded defect can return exit code 0 while its JSON check verdicts are `fail`: the specimen ran successfully and the checkers caught it.
+
+```sh
+uv run --locked erp-bench run examples/duplicate-retry.case.json
+```
+
+**Verified locally:** 18 behavioral/CLI tests, Ruff checks, and an installed wheel executed outside the checkout. See [completed tasks and next steps](docs/IMPLEMENTATION.md), [the actual verification record](reports/initial-implementation/verification.json) and [captured demo output](reports/initial-implementation/demo-1.json). This evidence covers the initial offline components; the full study remains pending.
 
 [Explore the example](#a-concrete-example) · [Architecture](docs/02-architecture.md) · [Evaluation protocol](docs/04-evaluation.md) · [Engineering standards](ENGINEERING.md)
 
@@ -42,6 +61,7 @@ A useful testbench must catch consequential failures without treating every bloc
 | Original synthetic scenarios and schemas | Concrete inputs and explicit expected behavior. |
 | Evaluation protocol and release criteria | How implementation and claims should be assessed. |
 | Source rationale | Which public evidence motivated the design and which conclusions remain hypotheses. |
+| [Initial implementation](docs/IMPLEMENTATION.md) | Runnable component code, boundary tests and captured synthetic output. |
 | Documentation checks | Whether the supplied JSON, relative links and original SVG assets are structurally valid. |
 
 Two original synthetic case specifications with expected outcomes, data contracts, fault taxonomy and an evaluation design.
@@ -75,13 +95,14 @@ From a clone of this repository with Python 3.12 or later:
 python scripts/check_public_docs.py
 ```
 
-This checks documentation only. Application installation and demo commands will be added when implemented and verified. The repository's **Documentation integrity** workflow runs the same check on pushes and pull requests.
+This checks documentation only. Behavioral tests run separately in the **Implementation checks** workflow. The repository's **Documentation integrity** workflow runs the same check on pushes and pull requests.
 
 ## Research roadmap
 
 - [x] Define the problem, contracts and illustrative synthetic scenarios.
 - [x] Document evaluation methods and consequential failure cases.
-- [ ] Implement and test a reproducible offline baseline.
+- [x] Implement and test the initial offline components documented above.
+- [ ] Complete the full offline workflow and baseline required by the release criteria.
 - [ ] Complete held-out comparisons and publish actual results, including failures.
 - [ ] Seek independent reproduction and review.
 

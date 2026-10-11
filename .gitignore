@@ -40,3 +40,15 @@ build/
 
 # Internal full handoff lives outside this public repository.
 BLUEPRINT.html
+
+# Python implementation artifacts.
+*.sqlite*
+.wheel-check/
+.wheel-requirements.txt
+
+# Reviewed synthetic implementation evidence only.
+reports/*
+!reports/initial-implementation/
+reports/initial-implementation/*
+!reports/initial-implementation/verification.json
+!reports/initial-implementation/demo-*.json

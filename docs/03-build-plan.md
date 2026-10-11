@@ -1,6 +1,6 @@
 # 03 — Public milestones
 
-The repository currently contains a benchmark design and two illustrative cases. Application and evaluation milestones are pending.
+Initial offline components are implemented and verified. See [component progress and actual evidence](IMPLEMENTATION.md). M1, M2 and M4 have partial component evidence; M3 has one seeded duplicate-retry defect only. M5 remains pending. Packaging covers this slice of M6. The milestones below retain their complete acceptance boundaries.
 
 | Milestone | Intended result | Evidence required |
 |---|---|---|

@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1",
+  "scope": "initial_offline_components_only",
+  "verified_at": "2026-10-11T13:32:22.194286+00:00",
+  "python": "3.12.13",
+  "platform": "Darwin",
+  "package_version": "0.1.0",
+  "clean_wheel_install": true,
+  "wheel_run_outside_checkout": true,
+  "schemas_loaded_from_installed_wheel": true,
+  "behavioral_tests": {
+    "command": "python -m pytest -q tests",
+    "passed": 18,
+    "failed": 0
+  },
+  "ruff": {
+    "lint": "passed",
+    "format": "passed"
+  },
+  "uv_lock_sha256": "9017bea6e9a21bb21e8141f2abe8a7d5f9b34fb45f944fbaffd9b6ee85923d1e",
+  "implementation_files_sha256": {
+    "src/erp_agent_testbench/__init__.py": "567facf79bbbd56a4b5bc1f80b4df6967d1e573100fdc680ab6591a658e3e77f",
+    "src/erp_agent_testbench/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/erp_agent_testbench/cli.py": "67084f077df3e7c9f0331ce4a518a69896e64d335ea65746487f4e99ff726050",
+    "src/erp_agent_testbench/common.py": "38c64e19f828112a4e547fd08da3f3d1a9d1ccd21cfe01f797d6bf884c300287",
+    "src/erp_agent_testbench/core.py": "11209d325617c41d9741678820cecc8074cdf69963bd0fd2f4800ac48d7948ea",
+    "tests/test_cli.py": "e6cbebda0375fcae0bafb3e31e8352efb503327531c3e514fc7aeef4a1a47ed7",
+    "tests/test_core.py": "81637939d1b2ab6ebaed16413c59fb314db12178c46f16f17e6a8fadf4bdb390",
+    "schemas/case.schema.json": "cfb1c7dfbe0ecf0724002354e19cf858f4c3cc09f9f4515c84fc6f29d6dc9297",
+    "schemas/expected-result.schema.json": "13d0c1843d5098cef8e72a178f959bebc498a25e697cc3980f757c0323672570",
+    "pyproject.toml": "ed98404790fb9e75d3031ce14ffeb71204607bdb9902053fdae0b7b9286e5795",
+    "uv.lock": "9017bea6e9a21bb21e8141f2abe8a7d5f9b34fb45f944fbaffd9b6ee85923d1e",
+    ".python-version": "aa0d6581054e6e4ff3f91839deca7a854ad37221b8784d060b42d0f847ff1a3b"
+  },
+  "demos": [
+    {
+      "input": "examples/clean-retry.case.json",
+      "input_sha256": "48bdd5b445ad05939dc34653ee8dda3d17f49a718a2961aff7270103d5a84dd6",
+      "command": "erp-bench run examples/clean-retry.case.json",
+      "exit_code": 0,
+      "output": "demo-1.json",
+      "output_sha256": "bd90e3e9f68b0ee7492f40e1b67a055460a40481213544b43fed59a10d423013"
+    },
+    {
+      "input": "examples/duplicate-retry.case.json",
+      "input_sha256": "d1311d80beaa1b3686e9d314a5885462ae4f2669af6b61c19c3a6a974339eaa7",
+      "command": "erp-bench run examples/duplicate-retry.case.json",
+      "exit_code": 0,
+      "output": "demo-2.json",
+      "output_sha256": "b8e8fd9ae94fba4355c060b4f4746d5c1e9c95588d8ae0467723fedf1a440bbe"
+    }
+  ],
+  "held_out_benchmark_executed": false,
+  "production_validated": false,
+  "limits": [
+    "Development fixtures and boundary tests only.",
+    "No predictive model or customer outcome is evaluated.",
+    "No live provider action is taken."
+  ]
+}
