@@ -27,7 +27,9 @@ The CLI prints JSON. `validate` checks the same input contract; invalid or unsup
 uv run --locked erp-bench run examples/duplicate-retry.case.json
 ```
 
-**Verified locally:** 18 behavioral/CLI tests, Ruff checks, and an installed wheel executed outside the checkout. See [completed tasks and next steps](docs/IMPLEMENTATION.md), [the actual verification record](reports/initial-implementation/verification.json) and [captured demo output](reports/initial-implementation/demo-1.json). This evidence covers the initial offline components; the full study remains pending.
+**Initial verification:** 18 behavioral/CLI tests, Ruff checks, and an installed wheel executed outside the checkout. The [original verification record](reports/initial-implementation/verification.json) and [captured demo output](reports/initial-implementation/demo-1.json) remain historical evidence for that slice.
+
+**Current component checks:** 80 tests and Ruff checks pass locally. The retry adapter now receives immutable public task/business records and tool responses, with fault selection and evaluator metadata kept in the controller. An independent test stub uses the same interface. Call/tick budgets are enforced before request serialization or validation; controller tick overflow also persists exhaustion. The controller rejects exhausted executions even if the adapter catches the tool error and claims completion. See [the boundary, current checks and remaining work](docs/IMPLEMENTATION.md). This is a trusted in-process adapter; process isolation and the full benchmark remain pending. The original wheel evidence has not been repeated for this change.
 
 [Explore the example](#a-concrete-example) · [Architecture](docs/02-architecture.md) · [Evaluation protocol](docs/04-evaluation.md) · [Engineering standards](ENGINEERING.md)
 
