@@ -2,6 +2,8 @@
 
 ![ERP Agent Testbench — Test the failure before it reaches the business.](docs/assets/overview.svg)
 
+[![Documentation integrity](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml)
+
 **How does an agent behave when an ERP workflow retries, partially fails or changes its contract?**
 
 Define a simulated purchase-order interface, inject controlled faults, and distinguish successful completion from dangerous or misleading success.
