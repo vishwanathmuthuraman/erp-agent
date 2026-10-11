@@ -1,0 +1,59 @@
+{
+  "schema_version": "0.1",
+  "case_id": "example-clean-retry-001",
+  "template_group": "example-retry-template-v1",
+  "split": "development_example",
+  "provenance": "original_synthetic",
+  "seed": 17,
+  "public_task": {
+    "operation_id": "op-example-001",
+    "order_id": "po-example-001",
+    "quantity_delta": 3,
+    "unit_price_minor": 1000,
+    "currency": "USD",
+    "allowed_terminal_statuses": [
+      "completed"
+    ]
+  },
+  "initial_state": {
+    "order": {
+      "order_id": "po-example-001",
+      "supplier_id": "supplier-example-001",
+      "currency": "USD",
+      "quantity": 10,
+      "unit_price_minor": 1000,
+      "version": 1
+    },
+    "approval": {
+      "approval_id": "approval-example-001",
+      "operation_id": "op-example-001",
+      "approved_quantity_delta": 3,
+      "approved_unit_price_minor": 1000,
+      "authority_limit_minor": 20000,
+      "policy_version": 1,
+      "valid_until_tick": 100
+    },
+    "policy": {
+      "policy_version": 1,
+      "supplier_active": true,
+      "max_order_total_minor": 20000
+    },
+    "operation_records": [],
+    "commitments": []
+  },
+  "disturbance": {
+    "kind": "response_lost_after_commit",
+    "at_attempt": 1,
+    "tick": 5
+  },
+  "mutation": {
+    "kind": "none",
+    "target": "reference_agent"
+  },
+  "limits": {
+    "max_tool_calls": 20,
+    "max_ticks": 100,
+    "wall_seconds": 30
+  },
+  "expected_result_file": "clean-retry.expected.json"
+}

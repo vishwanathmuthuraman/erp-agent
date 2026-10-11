@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERP Agent Testbench expected example result 0.1",
+  "description": "Design expectation, not measured output. Controller/scorer only.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "execution_status": {
+      "const": "not_run"
+    },
+    "expected_only": {
+      "const": true
+    },
+    "ground_truth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "clean",
+            "faulty"
+          ]
+        },
+        "fault_class": {
+          "enum": [
+            "none",
+            "duplicate_execution",
+            "approval_policy",
+            "schema_mismatch",
+            "partial_execution"
+          ]
+        },
+        "violated_rules": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          }
+        }
+      },
+      "required": [
+        "classification",
+        "fault_class",
+        "violated_rules"
+      ]
+    },
+    "expected_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "terminal_status": {
+          "enum": [
+            "completed",
+            "review_required",
+            "failed",
+            "incomplete"
+          ]
+        },
+        "apply_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "durable_operation_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commitment_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "order_quantity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commitment_total_minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "const": "USD"
+        }
+      },
+      "required": [
+        "terminal_status",
+        "apply_attempts",
+        "durable_operation_records",
+        "commitment_records",
+        "order_quantity",
+        "commitment_total_minor",
+        "currency"
+      ]
+    },
+    "expected_suite_verdicts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "smoke": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive",
+            "error"
+          ]
+        },
+        "state": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive",
+            "error"
+          ]
+        },
+        "hybrid": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive",
+            "error"
+          ]
+        }
+      },
+      "required": [
+        "smoke",
+        "state",
+        "hybrid"
+      ]
+    },
+    "expected_findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "smoke": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          }
+        },
+        "state": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          }
+        },
+        "hybrid": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          }
+        }
+      },
+      "required": [
+        "smoke",
+        "state",
+        "hybrid"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "case_id",
+    "execution_status",
+    "expected_only",
+    "ground_truth",
+    "expected_observation",
+    "expected_suite_verdicts",
+    "expected_findings"
+  ]
+}

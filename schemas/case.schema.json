@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERP Agent Testbench case specification 0.1",
+  "description": "Blueprint input contract. Mutation and expected-result metadata are controller-only, never suite/agent inputs. Additional fault parameters require a schema version change.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "template_group": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "split": {
+      "enum": [
+        "development_example",
+        "development",
+        "heldout"
+      ]
+    },
+    "provenance": {
+      "const": "original_synthetic"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "public_task": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        },
+        "order_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        },
+        "quantity_delta": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit_price_minor": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "allowed_terminal_statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "completed",
+              "review_required",
+              "failed"
+            ]
+          }
+        }
+      },
+      "required": [
+        "operation_id",
+        "order_id",
+        "quantity_delta",
+        "unit_price_minor",
+        "currency",
+        "allowed_terminal_statuses"
+      ]
+    },
+    "initial_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "order_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "supplier_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "currency": {
+              "const": "USD"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "unit_price_minor": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "order_id",
+            "supplier_id",
+            "currency",
+            "quantity",
+            "unit_price_minor",
+            "version"
+          ]
+        },
+        "approval": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "approval_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "operation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "approved_quantity_delta": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "approved_unit_price_minor": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "authority_limit_minor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "policy_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "valid_until_tick": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "approval_id",
+            "operation_id",
+            "approved_quantity_delta",
+            "approved_unit_price_minor",
+            "authority_limit_minor",
+            "policy_version",
+            "valid_until_tick"
+          ]
+        },
+        "policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "policy_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "supplier_active": {
+              "type": "boolean"
+            },
+            "max_order_total_minor": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "policy_version",
+            "supplier_active",
+            "max_order_total_minor"
+          ]
+        },
+        "operation_records": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "commitments": {
+          "type": "array",
+          "maxItems": 0
+        }
+      },
+      "required": [
+        "order",
+        "approval",
+        "policy",
+        "operation_records",
+        "commitments"
+      ]
+    },
+    "disturbance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "response_lost_after_commit",
+            "interrupt_after_order_write",
+            "approval_expired",
+            "malformed_tool_response"
+          ]
+        },
+        "at_attempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "at_attempt",
+        "tick"
+      ]
+    },
+    "mutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "retry_new_idempotency_key",
+            "skip_approval_check",
+            "coerce_invalid_schema",
+            "declare_partial_success"
+          ]
+        },
+        "target": {
+          "enum": [
+            "reference_agent",
+            "connector",
+            "simulator_profile"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "target"
+      ]
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_tool_calls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_ticks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "wall_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "max_tool_calls",
+        "max_ticks",
+        "wall_seconds"
+      ]
+    },
+    "expected_result_file": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+\\.expected\\.json$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "case_id",
+    "template_group",
+    "split",
+    "provenance",
+    "seed",
+    "public_task",
+    "initial_state",
+    "disturbance",
+    "mutation",
+    "limits",
+    "expected_result_file"
+  ]
+}

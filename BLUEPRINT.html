@@ -1,0 +1,913 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ERP Agent Testbench — Build blueprint</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f3f6f2;color:#183b34;font:16px/1.65 system-ui,sans-serif}header{background:#075345;color:white;padding:40px max(24px,calc((100vw - 1120px)/2))}h1{font:600 clamp(28px,4vw,42px)/1.2 Georgia,serif}header p{max-width:900px}main{max-width:1180px;padding:24px;margin:auto}nav{background:white;border:1px solid #d6e1da;border-radius:12px;padding:22px;margin-bottom:24px}nav ul{columns:2;column-gap:30px;padding-left:22px}section{background:white;border:1px solid #d6e1da;border-radius:12px;padding:30px;margin:24px 0;scroll-margin-top:16px}h2{font:600 28px/1.25 Georgia,serif}h3{font-size:21px}a{color:#075d53;text-underline-offset:3px}pre{background:#152e28;color:#eef5ed;padding:18px;border-radius:8px;overflow:auto;white-space:pre;font-size:13px;line-height:1.6}code{font-size:.9em;overflow-wrap:anywhere}pre code{font-size:inherit;overflow-wrap:normal}table{display:block;overflow:auto;border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #d6e1da;padding:11px;min-width:100px}th{background:#eef3ed}blockquote{border-left:4px solid #96a755;background:#f2f5e8;margin:18px 0;padding:8px 18px}.source{font-size:13px;color:#627169;border-bottom:1px solid #d6e1da;padding-bottom:12px}li{margin:7px 0}details{padding:10px 0}summary{cursor:pointer;font-weight:700}@media(max-width:700px){main{padding:10px}section{padding:20px}nav ul{columns:1}}@media print{body{background:white;font-size:10pt}header{background:white;color:#183b34;padding:8px}main{padding:0}section{border:0;border-radius:0;padding:10px;margin:10px 0}nav{display:none}pre{white-space:pre-wrap;background:#eee;color:#183b34}table{display:table;font-size:8pt}h1,h2,h3{break-after:avoid}tr{break-inside:avoid}}</style></head><body><header><p>BUILD BLUEPRINT · DOCUMENTATION AND EXAMPLES · 11 OCTOBER 2026</p><h1>ERP Agent Testbench</h1><p>A proposed product specification and sequenced implementation guide. Application implementation and evaluation results are not supplied. The Markdown source files are authoritative; this is an offline reading snapshot.</p></header><main><nav aria-label="Blueprint documents"><strong>Start with the README, then follow the build plan.</strong><ul><li><a href="#doc-readme-md">ERP Agent Testbench</a></li><li><a href="#doc-docs-01-product-requirements-md">01 — Product requirements</a></li><li><a href="#doc-docs-02-architecture-md">02 — Proposed architecture and layout</a></li><li><a href="#doc-docs-03-build-plan-md">03 — Sequenced build plan</a></li><li><a href="#doc-docs-04-evaluation-md">04 — Evaluation protocol</a></li><li><a href="#doc-docs-05-definition-of-done-md">05 — Definition of done</a></li><li><a href="#doc-docs-06-sources-and-design-rationale-md">06 — Sources and design rationale</a></li><li><a href="#doc-docs-07-delivery-and-risk-md">07 — Delivery, tradeoffs and risk</a></li><li><a href="#doc-docs-08-publication-md">08 — Public release and handoff</a></li><li><a href="#doc-examples-readme-md">Synthetic specification examples</a></li></ul></nav><section id="doc-readme-md"><p class="source">Editable source: <a href="README.md">README.md</a></p><h1 id="doc-readme-md--erp-agent-testbench">ERP Agent Testbench</h1>
+<p><strong>Status: documentation blueprint only — application, runner, simulator, tests and measured results are not implemented.</strong> The supplied JSON files are original synthetic design examples with expected outcomes, not execution results. All implementation tasks are <code>not_started</code>.</p>
+<p>Planned outcome: a local testbench that connects an agent to a simulated purchase-order workflow, introduces controlled failures, and produces a reviewable acceptance/regression report. Its four fault classes are duplicate execution, policy/approval violations, schema mismatches and partial execution.</p>
+<h2 id="doc-readme-md--start-here">Start here</h2>
+<ol>
+<li>Read <a href="#doc-docs-01-product-requirements-md">requirements</a> and <a href="#doc-docs-02-architecture-md">architecture</a>.</li>
+<li>Open <a href="#doc-docs-03-build-plan-md">the build plan</a> and <a href="planning/tasks.csv">task tracker</a>. Begin T01; dependencies determine the next task.</li>
+<li>Inspect the <a href="examples/clean-retry.case.json">clean example</a>, <a href="examples/duplicate-retry.case.json">faulty example</a> and their <a href="#doc-examples-readme-md">guide</a>.</li>
+<li>Implement the local vertical slice before generating a full benchmark or adding a model provider.</li>
+<li>Use <a href="#doc-docs-04-evaluation-md">evaluation</a> and <a href="#doc-docs-05-definition-of-done-md">definition of done</a> to decide what can be claimed.</li>
+</ol>
+<p>There is no installation or launch command today. Commands in the build plan describe a <strong>future CLI contract</strong> and will fail until its prerequisites are implemented. No API key is needed for the planned deterministic reference agent.</p>
+<h2 id="doc-readme-md--documentation-map">Documentation map</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Decision it supports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#doc-docs-01-product-requirements-md">01 Requirements</a></td>
+<td>Users, scope, stories and functional requirements</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-02-architecture-md">02 Architecture</a></td>
+<td>Boundaries, adapter, events, data and report layout</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-03-build-plan-md">03 Build plan</a></td>
+<td>Ordered work, files, commands and checkpoints</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-04-evaluation-md">04 Evaluation</a></td>
+<td>Dataset, fair comparisons and regression metrics</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-05-definition-of-done-md">05 Definition of done</a></td>
+<td>Release gates and requirement-to-test mapping</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-06-sources-and-design-rationale-md">06 Sources</a></td>
+<td>Primary evidence versus project inference</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-07-delivery-and-risk-md">07 Delivery and risk</a></td>
+<td>Milestones, effort, risks and decisions</td>
+</tr>
+<tr>
+<td><a href="#doc-docs-08-publication-md">08 Publication</a></td>
+<td>Review and release handoff</td>
+</tr>
+<tr>
+<td><a href="planning/tasks.csv">Task tracker</a></td>
+<td>Dependencies, outputs and acceptance criteria</td>
+</tr>
+</tbody>
+</table>
+<p>The proposed stack is Python 3.12, uv and SQLite, with a CLI and static HTML report first. A local FastAPI report viewer is optional. This project must work independently: a separate reference agent is included in the planned implementation; no sibling project, live ERP or hosted service is required.</p>
+<p>Reports will describe synthetic benchmark performance under specified controls. They will not certify an agent, establish production safety, or imply affiliation with a named ERP vendor. The simulator is a deliberately limited contract implementation.</p>
+<p><strong>License decision pending.</strong> No code, documentation or synthetic-data license grant is supplied, and no third-party reuse rights are asserted. Public sharing of this blueprint is not an application release. Resolve ownership, dependency licenses and attribution before an openly licensed reusable release; these decisions remain pending.</p></section><section id="doc-docs-01-product-requirements-md"><p class="source">Editable source: <a href="docs/01-product-requirements.md">docs/01-product-requirements.md</a></p><h1 id="doc-docs-01-product-requirements-md--01-product-requirements">01 — Product requirements</h1>
+<p>Status: proposed requirements; none is marked implemented. <a href="#doc-readme-md">Start here</a>.</p>
+<h2 id="doc-docs-01-product-requirements-md--problem-and-end-goal">Problem and end goal</h2>
+<p>An automation owner sees an agent complete one purchase-order demo. After a lost response the agent repeats the amendment, or it declares success although the order and commitment records disagree. A happy-path demonstration does not establish behavior under those conditions.</p>
+<p>Version 1 provides a bounded way to inspect these failures before handover or after a change. A reviewer must be able to connect every reported failure to an observable record, rule and event. Expected demand from implementation firms is a hypothesis; existing simulation and evaluation products overlap with this idea.</p>
+<h2 id="doc-docs-01-product-requirements-md--users-and-stories">Users and stories</h2>
+<table>
+<thead>
+<tr>
+<th>User</th>
+<th>Story</th>
+<th>Successful interaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Implementation engineer</td>
+<td>Connect an existing agent without changing its planning logic.</td>
+<td>Adapter conformance passes; the agent uses only simulator tools.</td>
+</tr>
+<tr>
+<td>Automation owner</td>
+<td>Establish the rules a deployment must meet.</td>
+<td>A versioned rule manifest identifies each control and its scope.</td>
+</tr>
+<tr>
+<td>Reviewer</td>
+<td>Understand a failed handover test.</td>
+<td>Report shows an assertion, expected/observed values and evidence IDs.</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>Detect regressions after a change.</td>
+<td>Paired report identifies newly failing rules and improvements separately.</td>
+</tr>
+<tr>
+<td>Independent reproducer</td>
+<td>Re-run a published experiment.</td>
+<td>Pinned environment and artifacts reproduce deterministic verdicts.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="doc-docs-01-product-requirements-md--bounded-workflow">Bounded workflow</h2>
+<p>Use one synthetic supplier, one currency per case, one order line and integer quantity changes. An agent reads an order and policy, locates a pre-existing approval, submits an amendment, checks completion and returns a status. The simulated ERP records the updated order and a commitment entry. A controlled interruption can occur between those two writes.</p>
+<p>Approval refers to the business operation and approved payload; it is not inferred from natural-language enthusiasm. Business operation ID, idempotency key, request hash and transport attempt ID have separate meanings. Reusing an idempotency key returns the prior result; changing it may perform the operation twice. This deliberately models a provider that deduplicates request keys rather than business intent.</p>
+<p>In scope: local deterministic simulator, JSON contracts, external-agent adapter, independent reference agent, seeded faults, three check suites, CLI, static report and CI example. Optional after core completion: localhost FastAPI viewer and an explicitly enabled model-backed agent.</p>
+<p>Out of scope: real purchasing, payments, ERP certification, production access controls, general ERP emulation, arbitrary user-code sandboxing, unbounded multi-agent workflows and automatic repair of real transactions.</p>
+<h2 id="doc-docs-01-product-requirements-md--functional-requirements">Functional requirements</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Observable acceptance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR-01</td>
+<td>Validate cases before execution.</td>
+<td>Unknown fields, wrong types and invalid cross-record references fail before any write.</td>
+</tr>
+<tr>
+<td>FR-02</td>
+<td>Create isolated state per execution.</td>
+<td>Two concurrent cases cannot read or change each other's database or artifacts.</td>
+</tr>
+<tr>
+<td>FR-03</td>
+<td>Support the documented purchase-order state machine.</td>
+<td>Clean execution creates one amendment and one matching commitment.</td>
+</tr>
+<tr>
+<td>FR-04</td>
+<td>Provide an independent adapter contract.</td>
+<td>A second stub agent works through the same interface as the reference agent.</td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td>Supply a deterministic reference agent.</td>
+<td>Clean retry reuses its key, checks operation status and completes correctly.</td>
+</tr>
+<tr>
+<td>FR-06</td>
+<td>Separate disturbances from defective behavior.</td>
+<td>A timeout recovered correctly is a clean case; a changed retry key can expose a duplicate.</td>
+</tr>
+<tr>
+<td>FR-07</td>
+<td>Represent four fault classes.</td>
+<td>Each class has a reviewed behavior-changing mutant and a clean counterpart.</td>
+</tr>
+<tr>
+<td>FR-08</td>
+<td>Produce bounded, ordered observable evidence.</td>
+<td>Tool request/response, logical time, state transition and terminal status have stable references.</td>
+</tr>
+<tr>
+<td>FR-09</td>
+<td>Keep ground truth outside agent and suite inputs.</td>
+<td>Fixture label, mutation configuration and expected verdicts are absent from observation bundles.</td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td>Evaluate smoke, state and hybrid suites.</td>
+<td>All receive the same immutable bundle and declared budget; skipped checks remain visible.</td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td>Distinguish failure, error and incomplete evidence.</td>
+<td>Invalid input or runner crashes cannot masquerade as a detected agent defect or pass.</td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td>Generate JSON and readable reports.</td>
+<td>Each finding links rule, evidence, expected value, observed value and severity.</td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td>Compare candidate and baseline releases.</td>
+<td>Only matching case/protocol manifests are paired; new failures appear individually.</td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td>Enforce execution and checking budgets.</td>
+<td>Exceeding wall time/tool calls stops work and returns an explicit incomplete/error record.</td>
+</tr>
+<tr>
+<td>FR-15</td>
+<td>Run offline by default and reproduce runs.</td>
+<td>Reference demo needs no secrets/network; replay preserves substantive verdicts.</td>
+</tr>
+<tr>
+<td>FR-16</td>
+<td>Support CI and public handoff.</td>
+<td>Expected demo failures, unexpected regressions and infrastructure errors have distinct exits.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="doc-docs-01-product-requirements-md--nonfunctional-requirements">Nonfunctional requirements</h2>
+<p>Money is signed integer minor units with an explicit currency; no binary floating-point business arithmetic. Case ticks are integers, separate from measured wall time. Validate all JSON at boundaries; reject unrecognized schema versions. Use explicit SQLite transactions and foreign-key enforcement on every connection. Logs contain synthetic tool evidence, not model secrets or hidden reasoning.</p>
+<p>Proposed limits: 20 agent tool calls, 100 logical ticks and 30 seconds wall time per execution; 100 evidence reads and five seconds per suite evaluation. These are initial development budgets, not performance measurements. Freeze revisions before held-out evaluation. The model path is disabled by default and requires an explicit provider, model, spend cap and authorization.</p>
+<h2 id="doc-docs-01-product-requirements-md--discovery-before-commercial-extension">Discovery before commercial extension</h2>
+<p>Ask implementation engineers for the last escaped retry, approval, schema or partial-write problem; the artifacts they used; time to diagnose; current tools; and who accepts deployment risk. Record negative findings. Access to real data, integrations and paid work is not assumed. Public examples stay synthetic even if discovery informs scenario design.</p></section><section id="doc-docs-02-architecture-md"><p class="source">Editable source: <a href="docs/02-architecture.md">docs/02-architecture.md</a></p><h1 id="doc-docs-02-architecture-md--02-proposed-architecture-and-layout">02 — Proposed architecture and layout</h1>
+<p>Status: design contracts, not implemented APIs. <a href="#doc-docs-01-product-requirements-md">Requirements</a>.</p>
+<h2 id="doc-docs-02-architecture-md--boundaries">Boundaries</h2>
+<pre><code class="language-mermaid">flowchart LR
+    Case[Case and hidden mutation spec] --&gt; Runner[Isolated execution runner]
+    Runner --&gt; Agent[Reference or external agent adapter]
+    Agent --&gt; Tools[Restricted tool client]
+    Tools --&gt; Sim[Local ERP simulator]
+    Sim --&gt; DB[Per-run SQLite state]
+    Runner --&gt; Bundle[Sanitized immutable observation bundle]
+    Bundle --&gt; Suites[Smoke / state / hybrid suites]
+    Suites --&gt; Report[Findings and report]
+    Oracle[Hidden expected outcomes] --&gt; Scorer[Offline benchmark scorer]
+    Report --&gt; Scorer
+</code></pre>
+<p>The agent sees task, tool schemas and tool results. It cannot read fixture files, databases, expected results or mutation controls. Suites see the same sanitized observation bundle; only the scorer receives ground truth. Reference-agent behavior and the checking code live in separate modules. Checker code must not import mutation or expected-result modules.</p>
+<p>An external adapter is a trusted integration supplied by the operator. Version 1 does not promise to contain malicious Python code. Running arbitrary agent code in the runner process would defeat isolation. For supported external adapters, use a separate process with a minimal environment and a restricted RPC/tool channel; no direct database mounts. Network isolation must be verified for the chosen execution environment, not inferred from localhost URLs. Untrusted adapters require a later, independently reviewed sandbox.</p>
+<p>Reference-agent mutants are controller-selected specimen variants, not options exposed to the agent. External agents receive disturbances through the tool boundary; do not pretend to mutate their internals unless a separately documented test wrapper supports that operation.</p>
+<h2 id="doc-docs-02-architecture-md--proposed-implementation-tree">Proposed implementation tree</h2>
+<p>Only README, docs, schemas, examples, planning and hygiene files exist now. The following source/test paths are future work:</p>
+<pre><code class="language-text">pyproject.toml                 # Python &gt;=3.12,&lt;3.13; erp-bench entry point
+uv.lock                       # generated and committed after dependency selection
+src/erp_agent_testbench/
+  cli.py                      # validate, execute, check, benchmark, compare, report
+  contracts.py                # strict typed boundary records
+  runner.py                   # isolation, timeout, manifests, artifact lifecycle
+  storage.py                  # SQLite schema, foreign keys, transactions
+  simulator.py                # tool methods and operation state machine
+  faults.py                   # controller-only disturbance/mutation hooks
+  observation.py              # allowlisted export; no oracle fields
+  adapters/base.py            # versioned adapter protocol
+  adapters/reference.py       # deterministic agent
+  adapters/subprocess.py      # independent process/RPC adapter
+  suites/smoke.py
+  suites/state.py
+  suites/hybrid.py
+  scoring.py                  # joins predictions with sealed ground truth
+  reporting.py                # JSON plus escaped static HTML
+  compare.py                  # paired release regressions
+  web.py                      # optional localhost read-only FastAPI viewer
+tests/{unit,integration,evaluation,acceptance}/
+fixtures/development/         # reviewed development cases, after implementation
+protocol/                     # public protocol and release manifests
+.github/workflows/ci.yml      # proposed; create only after local checks work
+</code></pre>
+<p>Shared tooling is optional. Start with local versioned contracts and fixtures; do not import a sibling checkout. Extract a package only when a real package version, lockfile and compatibility tests exist. Every clean install must work without other projects.</p>
+<h2 id="doc-docs-02-architecture-md--interfaces">Interfaces</h2>
+<p>All interfaces below are proposed version <code>0.1</code>. Choose one JSON serializer and canonical request-hash definition before implementing hashes.</p>
+<table>
+<thead>
+<tr>
+<th>Boundary</th>
+<th>Input</th>
+<th>Output / rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AgentAdapter.run</code></td>
+<td>public task, restricted tool client, limits</td>
+<td>terminal <code>completed</code>, <code>review_required</code>, <code>failed</code> or <code>incomplete</code>; summary and operation IDs</td>
+</tr>
+<tr>
+<td><code>read_order</code></td>
+<td>order ID</td>
+<td>quantity, integer unit price, currency, supplier, version</td>
+</tr>
+<tr>
+<td><code>read_policy</code></td>
+<td>supplier ID</td>
+<td>active status, policy version, amount threshold</td>
+</tr>
+<tr>
+<td><code>read_approval</code></td>
+<td>operation ID</td>
+<td>approved quantity delta/price, authority limit, expiry tick, policy version</td>
+</tr>
+<tr>
+<td><code>apply_amendment</code></td>
+<td>operation/order IDs, quantity delta, unit price, approval ID, idempotency key</td>
+<td>operation ID, status, updated order version; validates schema before side effects</td>
+</tr>
+<tr>
+<td><code>get_operation</code></td>
+<td>operation ID</td>
+<td>all matching attempt records and statuses; exposes ambiguity rather than selecting one silently</td>
+</tr>
+<tr>
+<td><code>resume_operation</code></td>
+<td>server operation-record ID, original idempotency key</td>
+<td>finish missing commitment for that record without reapplying the order delta</td>
+</tr>
+<tr>
+<td><code>CheckSuite.evaluate</code></td>
+<td>immutable observation, rule manifest, checking budget</td>
+<td>structured findings, checked/skipped rule IDs, elapsed work, verdict</td>
+</tr>
+</tbody>
+</table>
+<p>RPC requests carry <code>protocol_version</code>, <code>request_id</code>, <code>method</code>, <code>params</code>; responses carry the same ID and either <code>result</code> or a typed error. Errors distinguish invalid arguments, policy denial, timeout/unknown commit state, unsupported operation and infrastructure failure. Timeouts never imply that the server rolled back.</p>
+<p>Local execution does not require an HTTP service. The planned subprocess adapter communicates JSON Lines through pipes; the parent controls simulator access. An optional FastAPI layer exposes read-only report routes (<code>GET /runs</code>, <code>/runs/{id}</code>, <code>/runs/{id}/findings</code>) on <code>127.0.0.1</code>. No write route, authentication claim or Internet deployment is included.</p>
+<h2 id="doc-docs-02-architecture-md--data-and-state">Data and state</h2>
+<p>Proposed SQLite tables: <code>orders</code>, <code>approvals</code>, <code>policies</code>, <code>operation_attempts</code>, <code>commitments</code>, <code>events</code>. Each database belongs to one run. <code>operation_attempts</code> has a unique idempotency key; business operation IDs are indexed but deliberately not unique, so the checker can detect repeated intent submitted under new keys. This provider-like contract must be explicit in every report.</p>
+<p>An operation moves <code>requested → validated → order_applied → committed</code>. Denial occurs before <code>order_applied</code>. For partial-execution tests, an injected interruption may leave <code>order_applied</code> without a commitment. Recovery uses the recorded intermediate state. <code>completed</code> is legitimate only once the matching commitment exists. Do not claim atomicity across these modeled steps.</p>
+<p>Initialize each connection with <code>sqlite3.connect(..., autocommit=True)</code>, enable <code>PRAGMA foreign_keys=ON</code>, and verify the pragma returns <code>1</code> before setting <code>connection.autocommit = False</code> for explicit commit/rollback work. SQLite cannot change foreign-key enforcement inside an active transaction; setting the pragma after starting that transaction would silently leave the intended control disabled. Limit version 1 to one writer per database. Concurrent scenarios get separate files; parallel clients within a scenario use a deterministic serialized scheduler. This makes race coverage limited and disclosed.</p>
+<p>Request hash covers operation ID, order ID, quantity delta, unit price, currency and approval ID. It excludes transport attempt ID and idempotency key. A changed request with the same key returns a conflict. A matching key returns the original recorded operation/result even after response loss. Approval binding checks the approved business fields and current policy, not just possession of an approval ID.</p>
+<h2 id="doc-docs-02-architecture-md--observation-and-report-contracts">Observation and report contracts</h2>
+<p>An observation contains <code>schema_version</code>, opaque <code>case_token</code>, <code>execution_id</code>, task, initial/final business snapshots, public policy/approval records, ordered events, terminal agent result, execution budget usage and artifact hashes. Export no fault label, mutation name, expected rule list, split label or template group. It may include facts from which a defect can be inferred; hiding valid evidence would make evaluation artificial.</p>
+<p>Apply the allowlist recursively to both agent inputs and suite observations. Replace descriptive scenario/run IDs and filenames with opaque tokens; omit controller paths and mutation annotations embedded in auxiliary metadata. Hash only the sanitized artifact in the runtime view. Keep the reversible provenance map in the controller and join it after scoring for the human report. Preserve genuine business fields and observed tool errors. Planned leakage tests plant sentinel labels in nested metadata, filenames and IDs and assert that neither evaluated interface receives them.</p>
+<p>Events have <code>event_id</code>, sequence, logical tick, actor, tool, request ID, business operation ID, request hash, public arguments/result or typed error, and affected record IDs. Full model reasoning is neither requested nor stored. Preserve external content as data; HTML-escape it in reports.</p>
+<p>Findings contain rule ID, severity, evidence IDs, expected condition, observed value, and explanation. Suite verdicts are <code>pass</code>, <code>fail</code>, <code>inconclusive</code>, <code>error</code>. Benchmark classification is computed later. A report also records case/protocol/code/adapter versions, limits, measured runtime, optional token/cost usage and unsupported behaviors.</p>
+<h2 id="doc-docs-02-architecture-md--viewer-layout">Viewer layout</h2>
+<p>Static report first: a header with run identity and <strong>synthetic evaluation</strong> label; status cards for evaluated/failed/inconclusive/error counts; a sortable case table; and a detail panel showing expected condition, observed state, ordered tool evidence and state diff. Regression view has separate “new failures”, “fixed failures” and “unpaired cases” tables. Keyboard navigation, text labels and readable contrast are required; color alone never communicates status. The report remains readable without JavaScript.</p></section><section id="doc-docs-03-build-plan-md"><p class="source">Editable source: <a href="docs/03-build-plan.md">docs/03-build-plan.md</a></p><h1 id="doc-docs-03-build-plan-md--03-sequenced-build-plan">03 — Sequenced build plan</h1>
+<p><strong>Every command in this document is FUTURE and unimplemented unless it is a standard dependency-tool command. Do not run this as an existing application.</strong> All paths below are relative to the project root. <a href="planning/tasks.csv">Tracker</a> provides task-level dependencies and estimates.</p>
+<p>Prerequisites: a terminal, an editor, Python 3.12 and uv. Their presence is not assumed. Install uv using its <a href="https://docs.astral.sh/uv/getting-started/installation/">official installation instructions</a> and verify <code>uv --version</code>; record the version used. uv can provision Python 3.12 during the future setup. No dependencies were installed as part of this blueprint.</p>
+<h2 id="doc-docs-03-build-plan-md--a-establish-the-contract-t01t05">A. Establish the contract — T01–T05</h2>
+<p>Inputs: <a href="#doc-docs-01-product-requirements-md">requirements</a>, supplied schemas, clean/fault design examples. Review the operation/approval semantics and decide licenses. Create <code>pyproject.toml</code>, a source package, <code>.python-version</code> and the <code>erp-bench</code> entry point. Preserve existing documentation; do not overwrite it with a project-generator template. Select a small dependency set: JSON Schema validation, pytest and a formatter/linter; use standard-library SQLite and argparse initially.</p>
+<p><strong>Future setup commands after writing the package manifest:</strong></p>
+<pre><code class="language-sh">uv python pin 3.12
+uv add jsonschema
+uv add --dev pytest ruff
+uv lock
+uv sync --frozen
+uv run erp-bench --help
+</code></pre>
+<p>Expected output: a locked environment and honest CLI help, with unfinished commands explicitly unavailable. Implement schema validation plus cross-record validation; never accept a schema-valid dangling approval reference. Checkpoint A: malformed inputs fail before state creation, and every supplied example validates.</p>
+<h2 id="doc-docs-03-build-plan-md--b-build-one-clean-execution-t06t12">B. Build one clean execution — T06–T12</h2>
+<p>Create <code>storage.py</code>, <code>simulator.py</code>, <code>observation.py</code>, adapter contracts and deterministic reference agent. Implement order read, policy/approval read, amendment, operation lookup and resume. Keep source writes transactional within each modeled step. Implement a fresh run directory and database per execution. Add test coverage for normal state transitions, approval expiry, same-key/different-payload conflict and idempotency.</p>
+<p><strong>Future commands after T12:</strong></p>
+<pre><code class="language-sh">uv run pytest tests/unit tests/integration
+uv run erp-bench validate examples/clean-retry.case.json
+uv run erp-bench execute --case examples/clean-retry.case.json --agent reference --out artifacts/clean-demo
+</code></pre>
+<p>Expected output eventually: <code>manifest.json</code>, <code>observation.json</code>, <code>events.jsonl</code> and a local database under the new output directory. Refuse an existing output directory unless a distinct run ID is provided; never overwrite a prior run silently. The cleaned observation is the only input to suites.</p>
+<p>Checkpoint B: one timeout-after-commit followed by a same-key retry yields quantity 13, one committed operation and one commitment. This is a target, not a recorded result.</p>
+<h2 id="doc-docs-03-build-plan-md--c-expose-four-defect-classes-t13t18">C. Expose four defect classes — T13–T18</h2>
+<p>Create controller-only mutation hooks and disturbance scheduling. First implement response loss independently of retry-key mutation. Then implement approval bypass, schema-coercion/error handling and incomplete-operation success mutants. Give each mutation an explicit activation condition and traceable evidence. Add clean variants where the disturbance occurs but the reference system behaves correctly.</p>
+<p>Create the independent subprocess adapter with a benign stub agent. Test protocol-version rejection, tool allowlisting and budgets. A process crash or invalid protocol is an adapter/runner error, not a detection success. Checkpoint C: all four mutants change behavior under at least one reviewed case; clean counterparts satisfy their intended rules. Quarantine equivalent, unreachable and ambiguous mutants.</p>
+<h2 id="doc-docs-03-build-plan-md--d-implement-checking-and-reports-t19t26">D. Implement checking and reports — T19–T26</h2>
+<p>Build smoke, state and hybrid suites as pure readers of one observation. Define the rule catalog before implementations. Build JSON findings, static HTML and CLI return codes; then add version comparison. Validate render escaping with a synthetic string containing HTML markup.</p>
+<p><strong>Future commands after T26:</strong></p>
+<pre><code class="language-sh">uv run erp-bench execute --case examples/duplicate-retry.case.json --agent reference --out artifacts/fault-demo
+uv run erp-bench check --observation artifacts/fault-demo/observation.json --suite all --out artifacts/fault-checks
+uv run erp-bench report --checks artifacts/fault-checks --out artifacts/fault-report.html
+uv run erp-bench compare --baseline artifacts/baseline --candidate artifacts/candidate --out artifacts/comparison
+</code></pre>
+<p>The case controller applies the specified specimen mutation during execution; suites do not receive it. Expected example: smoke passes, state/hybrid identify duplicate application. <code>check</code> returns exit 1 for detected failure; that is an intentional demonstration outcome. <code>compare</code> rejects missing or incompatible baseline/candidate manifests with exit 2. The example directories for comparison do not exist today.</p>
+<p>Checkpoint D: every finding links to real observation evidence; incomplete observations never become clean passes; compare reports a seeded new failure rather than hiding it in an average.</p>
+<h2 id="doc-docs-03-build-plan-md--e-freeze-and-evaluate-t27t33">E. Freeze and evaluate — T27–T33</h2>
+<p>Construct 40 development cases; use them to tune rules and limits. A separate reviewer authors or withholds the 120 test executions and oracle files. Freeze code, protocol, group split and budgets first. Run mutant validity checks outside the suites, then capture observations once and evaluate every suite on those identical artifacts.</p>
+<p><strong>Future benchmark commands after T31 and reviewer handoff:</strong></p>
+<pre><code class="language-sh">uv run erp-bench benchmark --manifest private/heldout/manifest.json --suites smoke,state,hybrid --out artifacts/heldout-run
+uv run erp-bench score --run artifacts/heldout-run --oracle private/heldout/oracle.json --out artifacts/heldout-score
+uv run erp-bench report --checks artifacts/heldout-run --scores artifacts/heldout-score --out artifacts/heldout-report.html
+</code></pre>
+<p><code>private/heldout</code> is a proposed ignored directory, not a supplied dataset. Labels must be inaccessible to agent/suite processes. Benchmark exit 0 means the evaluation pipeline completed, not every specimen was safe; expected faulty specimens are part of its dataset. Pipeline errors return 2. Scoring must retain every assigned case, with invalid/error counts and exclusions explained.</p>
+<p>Checkpoint E: exactly 120 eligible executions × three suites = 360 suite evaluations. Do not silently reduce the denominator, rerun a failing case until it passes, or adjust thresholds after seeing test outcomes.</p>
+<h2 id="doc-docs-03-build-plan-md--f-independent-reproduction-and-release-t34t38">F. Independent reproduction and release — T34–T38</h2>
+<p>Generate a reusable CI workflow only after local commands are stable. The CI job installs Python 3.12, synchronizes the lockfile, validates examples, runs meaningful tests and publishes bounded synthetic report artifacts. An acceptance wrapper distinguishes an expected fault fixture from an unexpected regression.</p>
+<p>Ask a second person or use a separate clean environment to repeat the deterministic release. Resolve findings, record limitations and choose a release gate outcome. Publish only after the <a href="#doc-docs-08-publication-md">handoff checklist</a>, license gate and claim review pass.</p>
+<p><strong>Future release verification:</strong></p>
+<pre><code class="language-sh">uv sync --frozen
+uv run ruff check .
+uv run pytest
+uv run erp-bench demo --out artifacts/release-demo
+</code></pre>
+<p><code>demo</code> must verify the known clean/fault expectations and return 0 only when both match, with a report still showing the fault. It does not treat all agent runs as passing.</p>
+<p>Optional T39 adds the local report viewer only after the core release. Its future command is <code>uv run uvicorn erp_agent_testbench.web:app --host 127.0.0.1 --port 8000</code>, after adding the dependencies and implementing <code>web.py</code>. UI work must not delay an inspectable CLI/static report.</p>
+<h2 id="doc-docs-03-build-plan-md--resume-rules">Resume rules</h2>
+<p>Select the lowest task whose dependencies are done. Record exact outputs and evidence before changing status. If a requirement changes, update the FR, affected tests, protocol version and task acceptance together. Keep unfinished commands labeled future; do not create placeholder passing tests or fabricated result files to make a milestone appear complete.</p></section><section id="doc-docs-04-evaluation-md"><p class="source">Editable source: <a href="docs/04-evaluation.md">docs/04-evaluation.md</a></p><h1 id="doc-docs-04-evaluation-md--04-evaluation-protocol">04 — Evaluation protocol</h1>
+<p>Status: proposed protocol <code>0.1</code>; no executions, scores or accepted benchmark cases exist yet. The two supplied examples demonstrate contracts and are not a completed dataset.</p>
+<h2 id="doc-docs-04-evaluation-md--question-and-comparison-unit">Question and comparison unit</h2>
+<p>Which checking approach detects seeded workflow failures while limiting false alarms and checking work? The study evaluates <strong>check suites applied to observed executions</strong>, not three different agents. Capture each execution once, then give the identical sanitized artifact to all three suites. This removes agent randomness from the primary comparison.</p>
+<table>
+<thead>
+<tr>
+<th>Suite</th>
+<th>Planned checks</th>
+<th>Deliberate limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Smoke</td>
+<td>Terminal completion, parseable output, expected operation reference and presence of an updated order</td>
+<td>Does not establish uniqueness, correct final state or approval ordering.</td>
+</tr>
+<tr>
+<td>State</td>
+<td>Smoke plus record/schema, final quantity, unique intent, commitment consistency and approval binding invariants</td>
+<td>May miss a transient violation later hidden by repair.</td>
+</tr>
+<tr>
+<td>Hybrid</td>
+<td>State checks plus ordered tool/approval/retry/partial-completion rules</td>
+<td>More checks can increase false positives and work.</td>
+</tr>
+</tbody>
+</table>
+<p>All suites receive the same records, event history and public policy. They choose what to inspect; stronger suites do not receive additional ground truth. All are deterministic in the primary study. Adding an LLM judge would be a separate experiment requiring its own frozen protocol and budget.</p>
+<h2 id="doc-docs-04-evaluation-md--dataset-allocation">Dataset allocation</h2>
+<table>
+<thead>
+<tr>
+<th>Partition</th>
+<th>Duplicate</th>
+<th>Approval/policy</th>
+<th>Schema</th>
+<th>Partial execution</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Development faulty</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Development clean</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Held-out faulty</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>60</td>
+</tr>
+<tr>
+<td>Held-out clean</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<p>There are 40 development cases and 120 held-out executions. Evaluate each held-out execution with three suites: <strong>360 suite evaluations</strong>, each potentially containing multiple assertions. Do not describe this as 360 independent incidents or 360 individual assertions.</p>
+<p>Keep related workflow templates, parameter variants, clean/fault pairs and mutation-family variants in the same partition. Categories may recur across partitions; an instantiated template must not. Save template-group IDs in a controller-only split manifest, check overlaps automatically, and manually inspect structural similarity. Different names or random seeds do not make a reused template independent.</p>
+<p>A reviewer holds test fixtures and oracle files outside the agent/suite environment until code and protocol hashes are frozen. Authoring all test labels yourself limits blinding; disclose that if independent review is unavailable. Once held-out cases are published, they become public regression cases; future claims require a new withheld set. Never relabel a publicly seen corpus as unseen.</p>
+<h2 id="doc-docs-04-evaluation-md--disturbances-mutants-and-ground-truth">Disturbances, mutants and ground truth</h2>
+<p>A disturbance is a response loss, denial, changed interface or interruption. A mutant is a deliberate defect in the specimen agent/connector, or an explicitly stated system component. A disturbance that is handled correctly is a clean case, even if it produces retries.</p>
+<p>For each candidate mutant: prove the trigger executes; run the unmutated counterpart under the same schedule; inspect the resulting behavior; identify the violated rule; and have a reviewer confirm it without using suite predictions. Require an observable defect at the supported interface. Non-triggered, equivalent and ambiguous mutants are quarantined before sealing; preserve counts and reasons. No post-result replacement to improve detection scores.</p>
+<p>Clean cases must be independently checked for validity, including successful recovery, legitimate denial/review where the task requires it, and benign schema evolution within the declared contract. The suite must know the public task's accepted terminal statuses. Hidden oracle labels cannot supply that business rule.</p>
+<h2 id="doc-docs-04-evaluation-md--budgets-and-fairness">Budgets and fairness</h2>
+<p>Primary execution caps: 20 tool calls, 100 ticks and 30 wall seconds per specimen. Each suite gets at most 100 evidence reads and five wall seconds. Define one evidence read as one requested snapshot or event object; file reads alone are not the unit. Record actual reads, assertions and elapsed time. Freeze the machine description, environment, concurrency and adapter versions. Use a warm-up outside scored cases and randomize suite order or rotate it deterministically.</p>
+<p>Timeout, missing evidence and runner failure are not passes or detections. Report fault detection on all 60 assigned faulty executions and false alarms on all 60 clean executions, alongside coverage and inconclusive/error rates. If eligibility defects are discovered after sealing, show both original-assignment counts and a transparently corrected analysis; rescore all suites consistently.</p>
+<h2 id="doc-docs-04-evaluation-md--measures">Measures</h2>
+<ul>
+<li><strong>Fault detection:</strong> faulty executions with at least one valid failure finding / 60. Also report each class / 15.</li>
+<li><strong>Clean false-alarm rate:</strong> clean executions with a failure finding / 60. Unsupported findings are not discarded silently.</li>
+<li><strong>Complete coverage:</strong> evaluations yielding pass/fail with all intended checks complete / 120, per suite. Report incomplete/error cases separately.</li>
+<li><strong>Localization:</strong> detected faulty executions identifying an oracle-accepted rule and causal evidence / detected faulty executions. Publish the rule-mapping policy before scoring.</li>
+<li><strong>Checking work:</strong> median/p95 reads, assertions and runtime; execution work is reported separately and identical across suites.</li>
+<li><strong>Regression rate:</strong> cases that pass in the baseline release and fail in the candidate / cases that passed in baseline with comparable observations. If none pass, rate is undefined. List new critical failures individually; a fixed old failure cannot cancel a new critical failure.</li>
+</ul>
+<p>For release comparison, rerun the same frozen scenario set with candidate and baseline agent versions, then apply one frozen suite version. Separate a checker change from an agent change; do not compare unlike protocols. Report lost coverage and newly errored cases as regressions in evidence quality, not successful tests.</p>
+<p>Use paired differences between suites and uncertainty clustered by shared template group. Synthetic family balance is a design choice, not an estimate of real defect prevalence. Do not claim precision on live workloads from a 50/50 constructed corpus. Three suites on the same execution are correlated observations.</p>
+<h2 id="doc-docs-04-evaluation-md--replay-artifacts-and-optional-model-runs">Replay, artifacts and optional model runs</h2>
+<p>Manifests record case hashes, split/group manifest hash, schema/protocol versions, code commit when available, lock hash, adapter and rule versions, seed, schedule, budgets, machine/runtime and artifact hashes. Stable normalized state and verdicts should reproduce; volatile timestamps/run IDs are compared separately.</p>
+<p>Store raw observations, predictions and ground truth separately. Scoring joins opaque IDs only after evaluation. An optional model experiment needs a fixed subset, repetitions, model/provider version, prompt hash, token limits and a separate spending cap. It cannot be silently folded into the 360 deterministic suite evaluations.</p>
+<p>Negative results are valid outputs. If hybrid checking adds no useful detection or too many alarms, report that finding and preserve the original protocol.</p></section><section id="doc-docs-05-definition-of-done-md"><p class="source">Editable source: <a href="docs/05-definition-of-done.md">docs/05-definition-of-done.md</a></p><h1 id="doc-docs-05-definition-of-done-md--05-definition-of-done">05 — Definition of done</h1>
+<p><strong>All targets below are pending. No test has been implemented or passed, and no performance target is achieved.</strong> <a href="#doc-docs-04-evaluation-md">Evaluation protocol</a>.</p>
+<h2 id="doc-docs-05-definition-of-done-md--completion-gates">Completion gates</h2>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contract complete</td>
+<td>Every example validates; invalid references/types/versions fail before writes; adapter and rule versions documented.</td>
+</tr>
+<tr>
+<td>Functional slice</td>
+<td>Independent reference and stub adapters complete the clean task; clean timeout recovery produces exactly one effect.</td>
+</tr>
+<tr>
+<td>Fault coverage</td>
+<td>Four reviewed development defects yield correct hybrid findings; clean counterparts do not fail; missing evidence cannot pass.</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>Fresh state per run; no cross-case reads/writes; oracle/mutation fields absent from adapter/suite inputs; default run makes no external calls.</td>
+</tr>
+<tr>
+<td>Reproducibility</td>
+<td>Separate clean installation repeats normalized deterministic state and suite verdicts for all released examples.</td>
+</tr>
+<tr>
+<td>Evaluation integrity</td>
+<td>40 development and 120 held-out cases documented; no split-group overlap; 360 suite evaluations with complete denominators and errors.</td>
+</tr>
+<tr>
+<td>Operational report</td>
+<td>Every finding has rule/evidence/value links; report opens locally; injected HTML renders as text; regression view exposes new failures.</td>
+</tr>
+<tr>
+<td>Public release</td>
+<td>Ownership/license decisions resolved; claims match evidence; protocol, reproducible artifacts and limitations available.</td>
+</tr>
+</tbody>
+</table>
+<p>Initial <strong>performance hypotheses</strong> for an acceptance-focused v1: hybrid detects at least 54/60 held-out faulty cases, at least 12/15 per class, with at most 3/60 clean false alarms and zero missing records in the evaluation inventory. A new critical regression blocks release of the affected reference-agent version. Freeze these targets before the test set is opened; they are proposed engineering acceptance thresholds, not validated industry standards.</p>
+<p>Missing a performance target does not justify changing labels, removing hard cases or hiding results. Publish a clearly labeled experimental report with unmet targets; keep the acceptance-focused release gate open. A complete honest study and an accepted product release are different states.</p>
+<h2 id="doc-docs-05-definition-of-done-md--requirement-to-test-plan">Requirement-to-test plan</h2>
+<p>Names below designate tests to implement, not existing files or results. All map to future <code>tests/</code> modules described in the build plan.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Planned smoke/positive test</th>
+<th>Planned fault/negative test</th>
+<th>False-positive or boundary check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR-01</td>
+<td><code>test_valid_case</code></td>
+<td><code>test_invalid_type_rejected</code></td>
+<td><code>test_optional_fields_omitted</code></td>
+</tr>
+<tr>
+<td>FR-02</td>
+<td><code>test_fresh_run_state</code></td>
+<td><code>test_cross_run_access_denied</code></td>
+<td><code>test_identical_ids_in_separate_runs</code></td>
+</tr>
+<tr>
+<td>FR-03</td>
+<td><code>test_order_commitment_complete</code></td>
+<td><code>test_partial_state_not_complete</code></td>
+<td><code>test_resume_does_not_reapply</code></td>
+</tr>
+<tr>
+<td>FR-04</td>
+<td><code>test_stub_adapter_conformance</code></td>
+<td><code>test_unknown_rpc_version</code></td>
+<td><code>test_allowed_review_terminal</code></td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td><code>test_reference_clean_retry</code></td>
+<td><code>test_retry_key_mutant</code></td>
+<td><code>test_lost_response_same_key_clean</code></td>
+</tr>
+<tr>
+<td>FR-06–07</td>
+<td><code>test_clean_disturbance_controls</code></td>
+<td><code>test_four_mutants_trigger</code></td>
+<td><code>test_equivalent_mutant_quarantined</code></td>
+</tr>
+<tr>
+<td>FR-08–09</td>
+<td><code>test_ordered_evidence</code></td>
+<td><code>test_oracle_field_leak</code></td>
+<td><code>test_public_policy_remains_visible</code></td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td><code>test_three_suites_same_bundle</code></td>
+<td><code>test_suite_budget_exhaustion</code></td>
+<td><code>test_no_new_evidence_for_hybrid</code></td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td><code>test_valid_failure_classification</code></td>
+<td><code>test_runner_crash_is_error</code></td>
+<td><code>test_missing_events_inconclusive</code></td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td><code>test_report_evidence_links</code></td>
+<td><code>test_html_payload_escaped</code></td>
+<td><code>test_zero_findings_readable</code></td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td><code>test_new_failure_reported</code></td>
+<td><code>test_mismatched_manifests_rejected</code></td>
+<td><code>test_fixed_failure_not_new_regression</code></td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td><code>test_within_budget</code></td>
+<td><code>test_wall_timeout_stops_agent</code></td>
+<td><code>test_exact_limit_boundary</code></td>
+</tr>
+<tr>
+<td>FR-15</td>
+<td><code>test_offline_demo</code></td>
+<td><code>test_external_destination_rejected</code></td>
+<td><code>test_replay_normalized_state_equal</code></td>
+</tr>
+<tr>
+<td>FR-16</td>
+<td><code>test_demo_known_expectations</code></td>
+<td><code>test_unexpected_ci_failure_exit</code></td>
+<td><code>test_expected_fault_is_demo_success</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="doc-docs-05-definition-of-done-md--five-minute-demonstration-after-implementation">Five-minute demonstration, after implementation</h2>
+<ol>
+<li>State the scope: synthetic one-line purchasing workflow; no production certification.</li>
+<li>Run the future <code>erp-bench demo</code> command from <a href="#doc-docs-03-build-plan-md">the build plan</a>. Display the manifest and environment.</li>
+<li>Open the clean retry: first response is lost, the agent reuses the key, and quantity moves from 10 to 13 once. All three suites should pass.</li>
+<li>Open the faulty retry: changed key produces quantity 16 and two business effects. Smoke should pass; state/hybrid should fail. Show the exact two records and retry events.</li>
+<li>Show one case for each remaining fault class and its clean counterpart; distinguish intentionally seeded defects from implementation errors.</li>
+<li>Open the release comparison; show one newly failing rule and one fixed rule without aggregating them away.</li>
+<li>End with measured counts, false alarms, incomplete evidence and simulator limitations. Do not substitute expected fixture values for observed output.</li>
+</ol>
+<p>Completion evidence goes into the tracker and release notes with artifact paths and hashes. A checked box without supporting output is insufficient.</p></section><section id="doc-docs-06-sources-and-design-rationale-md"><p class="source">Editable source: <a href="docs/06-sources-and-design-rationale.md">docs/06-sources-and-design-rationale.md</a></p><h1 id="doc-docs-06-sources-and-design-rationale-md--06-sources-and-design-rationale">06 — Sources and design rationale</h1>
+<p>Research checked 11 October 2026. Short paraphrases below preserve the distinction between reported findings and this project's choices. No firm endorses this project.</p>
+<h2 id="doc-docs-06-sources-and-design-rationale-md--problem-evidence">Problem evidence</h2>
+<p><strong>PwC, 2025 Responsible AI survey.</strong> Half of surveyed leaders identified translating principles into scalable operational processes as their largest hurdle. The survey covered 310 US business leaders at director level or above, fielded September 26–October 2, 2025. PwC also discusses testing, monitoring and feedback as operational capabilities. <a href="https://www.pwc.com/us/en/tech-effect/ai-analytics/responsible-ai-survey.html">Official report</a>.</p>
+<p><strong>Project inference:</strong> repeatable workflow tests may help an automation owner turn stated controls into inspectable evidence. The survey does not measure demand for this testbench, willingness to pay, or the frequency of these four defects. Its self-reported US sample is not a universal enterprise failure rate.</p>
+<p><strong>Deloitte, State of AI in the Enterprise, January 2026.</strong> Page 20 reports that 21% of companies surveyed had a mature governance model for autonomous agents. The report describes 3,235 senior respondents across 24 countries, fielded August–September 2025, supplemented by 15 interviews. The sample targets organizations and leaders involved in AI. <a href="https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/consulting/2026/state-of-ai-2026.pdf">Official PDF, governance page 20 and methodology page 40</a>.</p>
+<p><strong>Project inference:</strong> a concrete acceptance process is worth testing with implementers. The statistic does not establish that testing alone closes the governance gap, nor that this simulator predicts production reliability.</p>
+<h2 id="doc-docs-06-sources-and-design-rationale-md--existing-approaches-and-limits-of-novelty">Existing approaches and limits of novelty</h2>
+<p><a href="https://veris.ai/">Veris</a> markets policy/workflow benchmarks in simulated systems. <a href="https://www.fabriklabs.ai/">Fabrik</a> describes stateful workflow tests, reviewed business rules and release comparisons. These are vendor descriptions, not independently verified performance. The proposed contribution is a small inspectable workflow contract, an explicit fault protocol and reproducible comparison. Generic simulation, regression testing and agent tracing are established approaches.</p>
+<h2 id="doc-docs-06-sources-and-design-rationale-md--technical-references-and-chosen-use">Technical references and chosen use</h2>
+<table>
+<thead>
+<tr>
+<th>Primary reference</th>
+<th>What it establishes</th>
+<th>Project decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://docs.astral.sh/uv/guides/projects/">uv project guide</a></td>
+<td>Project manifests, lockfiles and uv execution workflow</td>
+<td>Pin Python 3.12 and commit a generated lockfile after implementation.</td>
+</tr>
+<tr>
+<td><a href="https://docs.python.org/3.12/library/sqlite3.html">Python 3.12 sqlite3</a></td>
+<td>Transaction control through explicit autocommit configuration</td>
+<td>Set transaction behavior explicitly instead of relying on changing defaults.</td>
+</tr>
+<tr>
+<td><a href="https://www.sqlite.org/isolation.html">SQLite isolation</a></td>
+<td>Database transaction/isolation behavior</td>
+<td>One writer per run and independent databases; do not imply cross-service atomicity.</td>
+</tr>
+<tr>
+<td><a href="https://json-schema.org/draft/2020-12">JSON Schema 2020-12</a></td>
+<td>Schema vocabulary and validation specification</td>
+<td>Use supplied strict schemas, plus semantic reference checks in code.</td>
+</tr>
+<tr>
+<td><a href="https://docs.pytest.org/en/stable/how-to/usage.html">pytest invocation</a></td>
+<td>CLI test selection and invocation</td>
+<td>Use meaningful unit, integration and acceptance tests once implemented.</td>
+</tr>
+<tr>
+<td><a href="https://fastapi.tiangolo.com/deployment/manually/">FastAPI manual serving</a></td>
+<td>Serving an ASGI application</td>
+<td>Optional read-only localhost report viewer, after static reporting works.</td>
+</tr>
+<tr>
+<td><a href="https://docs.temporal.io/encyclopedia/event-history">Temporal event history</a></td>
+<td>Durable history and replay in its own workflow system</td>
+<td>Reuse the general discipline of inspectable histories; this project does not implement Temporal guarantees.</td>
+</tr>
+</tbody>
+</table>
+<p>Our sample sizes, budgets, architecture, prices if later proposed, acceptance thresholds and timelines are design assumptions. Technical citations establish underlying mechanisms, not that this unimplemented testbench works. Recheck dependency/API details at implementation and record selected versions.</p></section><section id="doc-docs-07-delivery-and-risk-md"><p class="source">Editable source: <a href="docs/07-delivery-and-risk.md">docs/07-delivery-and-risk.md</a></p><h1 id="doc-docs-07-delivery-and-risk-md--07-delivery-tradeoffs-and-risk">07 — Delivery, tradeoffs and risk</h1>
+<p>Status: planning estimates. No commercial validation, implementation or operating costs have been observed. <a href="planning/tasks.csv">Task tracker</a>.</p>
+<h2 id="doc-docs-07-delivery-and-risk-md--milestones-and-decisions">Milestones and decisions</h2>
+<table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>Tasks</th>
+<th>Exit decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1 Contract</td>
+<td>T01–T05</td>
+<td>Semantics, schemas and scope accepted; license decision recorded.</td>
+</tr>
+<tr>
+<td>M2 Clean slice</td>
+<td>T06–T12</td>
+<td>One independently runnable workflow with bounded evidence.</td>
+</tr>
+<tr>
+<td>M3 Faults/adapters</td>
+<td>T13–T18</td>
+<td>Four valid defect classes; external stub uses the same boundary.</td>
+</tr>
+<tr>
+<td>M4 Suites/report</td>
+<td>T19–T26</td>
+<td>Failure explanations and regression comparison inspectable.</td>
+</tr>
+<tr>
+<td>M5 Evaluation</td>
+<td>T27–T33</td>
+<td>Frozen comparison completed with all cases accounted for.</td>
+</tr>
+<tr>
+<td>M6 Handoff</td>
+<td>T34–T38</td>
+<td>Reproduction and publication gates evaluated; optional T39 deferred.</td>
+</tr>
+</tbody>
+</table>
+<p>The tracker totals 147 estimated core hours plus five optional viewer hours. At 15–20 focused hours weekly, core implementation is approximately eight to ten weeks before substantial surprises; six weeks would require about 25 hours weekly plus reviewer availability. Calendar duration is not a promise. Review actual effort weekly. Defer optional UI/model work before reducing core fault coverage. Never shrink a sealed dataset silently to meet a date.</p>
+<h2 id="doc-docs-07-delivery-and-risk-md--decision-log-to-maintain">Decision log to maintain</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Proposed decision</th>
+<th>Reason</th>
+<th>Revisit trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-01</td>
+<td>CLI/static report before UI</td>
+<td>Faster inspectable end-to-end workflow</td>
+<td>Reviewers cannot navigate artifacts.</td>
+</tr>
+<tr>
+<td>D-02</td>
+<td>SQLite per execution</td>
+<td>Simple reproducibility and separation</td>
+<td>Real concurrency fidelity becomes an accepted requirement.</td>
+</tr>
+<tr>
+<td>D-03</td>
+<td>Deterministic primary benchmark</td>
+<td>Isolate checking behavior</td>
+<td>Explicit model comparison is funded and frozen separately.</td>
+</tr>
+<tr>
+<td>D-04</td>
+<td>Request-key deduplication only in simulator</td>
+<td>Expose repeated business intent under new keys</td>
+<td>Target ERP contract differs; create a versioned profile.</td>
+</tr>
+<tr>
+<td>D-05</td>
+<td>Observable contract rather than vendor replica</td>
+<td>Bounds implementation and claims</td>
+<td>Partner supplies a documented interface and sandbox.</td>
+</tr>
+<tr>
+<td>D-06</td>
+<td>License selection pending</td>
+<td>Ownership and reuse terms need an explicit decision</td>
+<td>Before reusable/public release.</td>
+</tr>
+</tbody>
+</table>
+<p>Append actual decision date, owner, alternatives, evidence and consequences when a decision is accepted. Proposed choices are not decisions already made by a customer.</p>
+<h2 id="doc-docs-07-delivery-and-risk-md--risk-register">Risk register</h2>
+<table>
+<thead>
+<tr>
+<th>Risk and consequence</th>
+<th>Control and verification</th>
+<th>Residual risk / response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Suites see fault labels and overstate detection</td>
+<td>Allowlisted bundles; leakage canaries and separate scorer</td>
+<td>A human author may know the test set; disclose limits.</td>
+</tr>
+<tr>
+<td>Equivalent mutant inflates/deflates scores</td>
+<td>Trigger review and unmutated counterpart before sealing</td>
+<td>Model realism still limited; publish exclusions.</td>
+</tr>
+<tr>
+<td>Simulator is mistaken for a real ERP</td>
+<td>Contract table and unsupported behaviors in each report</td>
+<td>Require new validation before a partner integration.</td>
+</tr>
+<tr>
+<td>Duplicate writes from response loss</td>
+<td>Separate intent/key IDs; known retry fixtures</td>
+<td>Provider behavior varies; do not generalize.</td>
+</tr>
+<tr>
+<td>Partial writes mislabeled successful</td>
+<td>Intermediate state and commitment assertions</td>
+<td>No claim of atomicity across external services.</td>
+</tr>
+<tr>
+<td>Checker flags legitimate denial/recovery</td>
+<td>Clean controls and public allowed-status rules</td>
+<td>New workflows require new control definitions.</td>
+</tr>
+<tr>
+<td>Arbitrary adapter accesses secrets/network</td>
+<td>Trusted adapter scope, minimal process environment, verified isolation</td>
+<td>Version 1 is not a hostile-code sandbox.</td>
+</tr>
+<tr>
+<td>Public artifacts expose private material</td>
+<td>Original synthetic records; no real exports in examples</td>
+<td>Review generated logs before release.</td>
+</tr>
+<tr>
+<td>Checking budgets censor hard cases</td>
+<td>Report timeouts/coverage alongside detection</td>
+<td>Increase budgets only with a new protocol.</td>
+</tr>
+<tr>
+<td>Scope expands into a full ERP</td>
+<td>One line/currency/workflow; defer UI/model work</td>
+<td>A broader product needs a separate scoped plan.</td>
+</tr>
+<tr>
+<td>Licensing unclear</td>
+<td>No invented license; ownership/dependency review gate</td>
+<td>Release remains pending until resolved.</td>
+</tr>
+<tr>
+<td>No buyer benefit beyond existing tools</td>
+<td>Inspect concrete handover incidents and alternatives</td>
+<td>Keep a bounded research/tooling release.</td>
+</tr>
+</tbody>
+</table>
+<p>Use qualitative likelihood until evidence supports numbers. Each risk links to a consequence, a control, a test and the remaining limitation; a risk score alone is not mitigation.</p>
+<h2 id="doc-docs-07-delivery-and-risk-md--cost-model">Cost model</h2>
+<p>The deterministic reference path is designed for local execution with zero external model calls. That does not make labor or computing free. Record engineering hours, reviewer hours, machine runtime, storage and any CI charges separately.</p>
+<p>Planned primary workload: 120 captured executions plus 360 checking passes. At the caps, capture wall time is 3,600 seconds and checking wall time 1,800 seconds, excluding setup, validation, artifact generation and development work. These are arithmetic upper bounds for serial capped steps, not measured runtimes or a throughput claim.</p>
+<p>For optional models: estimated cost equals input tokens × quoted input price plus output tokens × quoted output price, divided by the price unit, plus any tool charges. Record provider/model, price date, currency, retries and an explicit hard spend cap. No provider, subscription, deployment or spending is authorized by this document.</p>
+<p>Commercial discovery should measure time to prepare cases, investigate a failure and repeat a release test. Proposed value remains unproven until observed with the intended users. Treat a useful open demonstration, a successful handover and a paying deployment as separate outcomes.</p></section><section id="doc-docs-08-publication-md"><p class="source">Editable source: <a href="docs/08-publication.md">docs/08-publication.md</a></p><h1 id="doc-docs-08-publication-md--08-public-release-and-handoff">08 — Public release and handoff</h1>
+<p>The current deliverable is prepared for authorized public GitHub sharing as a documentation blueprint, not an application release. License selection is pending; no code, documentation or synthetic-data license grant is supplied. Do not publish screenshots, badges, pass rates or a working-demo claim until those artifacts actually exist. <a href="#doc-docs-05-definition-of-done-md">Completion gates</a>.</p>
+<h2 id="doc-docs-08-publication-md--release-checklist">Release checklist</h2>
+<ul>
+<li>[ ] Decide code, documentation and synthetic-data licenses; confirm ownership and third-party terms. Do not infer permission from public availability.</li>
+<li>[ ] Verify every public fixture is synthetic; review logs, screenshots, configuration, filenames and version-control history for private material.</li>
+<li>[ ] Confirm <code>.env</code>, private/raw datasets, runtime databases and generated working output remain excluded. A <code>.gitignore</code> does not remove already tracked content or rotate credentials.</li>
+<li>[ ] Replace future commands with verified commands only after implementation. Preserve the blueprint status on incomplete components.</li>
+<li>[ ] Reproduce from a clean installation with the lockfile and record the environment, hardware, code and artifact hashes.</li>
+<li>[ ] Validate the full case inventory, split groups, mutant audit and evaluator/agent separation.</li>
+<li>[ ] Publish protocol, rule definitions, denominators, false alarms, errors, exclusions and limitations alongside result tables.</li>
+<li>[ ] Separate expected fixture output from measured results; mark every report with its actual execution status.</li>
+<li>[ ] Explain that published held-out cases are thereafter public regression data.</li>
+<li>[ ] Render-check static reports at desktop and narrow widths; inspect escaping, evidence links, keyboard navigation and readable status labels.</li>
+<li>[ ] Include one reference-agent example and one independent adapter demonstration; neither may depend on another repository checkout.</li>
+<li>[ ] Record remaining unsupported ERP operations, concurrency limits and the trusted-adapter boundary.</li>
+<li>[ ] Review claims: no certification, guaranteed production safety, unsupported novelty or unmeasured customer impact.</li>
+<li>[ ] Obtain independent review and record substantive feedback and fixes accurately.</li>
+</ul>
+<h2 id="doc-docs-08-publication-md--proposed-release-bundle">Proposed release bundle</h2>
+<p>After implementation, hand off a source archive, resolved license files, lockfile, protocol/rule manifests, original synthetic examples, clean/fault demo, JSON/HTML report, evaluation tables, reproduction instructions and known-limitations note. Approved small report examples may be copied into a deliberately reviewed <code>release/</code> directory; routine <code>artifacts/</code> output remains ignored. Do not publish an empty results folder as evidence.</p>
+<p>An operator handoff should explain installation, adapter setup, local isolation, budgets, execution versus suite exit codes, locating evidence, resetting only a named run, and comparing releases. Include a rollback plan for reverting testbench code/configuration; this is not a promise to reverse business transactions.</p>
+<h2 id="doc-docs-08-publication-md--suggested-factual-project-description">Suggested factual project description</h2>
+<p>Until implemented: “A documented blueprint for a local ERP-agent testbench covering retries, approvals, schema errors and partial execution. Includes original synthetic fixtures and a proposed evaluation protocol.”</p>
+<p>After verified release, replace that sentence with the actual implemented scope and measured result, explicitly naming synthetic data, dataset size, relevant limits and remaining failures. Link the release and report. Do not insert anticipated results into publication drafts.</p>
+<h2 id="doc-docs-08-publication-md--maintenance">Maintenance</h2>
+<p>Version contracts when fields or semantics change; version the benchmark when cases or labels change. A checker correction requires all affected comparisons to be rerun consistently. Preserve old manifests and explain corrections. Revalidate dependencies and publishing claims on every release. Track issues from actual users without exposing their data.</p></section><section id="doc-examples-readme-md"><p class="source">Editable source: <a href="examples/README.md">examples/README.md</a></p><h1 id="doc-examples-readme-md--synthetic-specification-examples">Synthetic specification examples</h1>
+<p>These files are <strong>design inputs and expected outcomes</strong>, authored for this blueprint. They have not been executed and are not benchmark results. All identifiers and amounts are fictional.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Disturbance / specimen</th>
+<th>Expected quantity and effects</th>
+<th>Expected suites</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="examples/clean-retry.case.json">Clean retry</a></td>
+<td>Response lost after commit; correct same-key retry</td>
+<td>13; one operation record and commitment</td>
+<td>smoke/state/hybrid pass</td>
+</tr>
+<tr>
+<td><a href="examples/duplicate-retry.case.json">Duplicate retry</a></td>
+<td>Same disturbance; retry-key mutation</td>
+<td>16; two operation records and commitments</td>
+<td>smoke pass; state/hybrid fail</td>
+</tr>
+</tbody>
+</table>
+<p>Expected details are in <a href="examples/clean-retry.expected.json">clean expected</a> and <a href="examples/duplicate-retry.expected.json">duplicate expected</a>. The <a href="schemas/case.schema.json">case schema</a> and <a href="schemas/expected-result.schema.json">expected-result schema</a> define structure. Implemented validation must additionally check cross-record references and scenario semantics.</p>
+<p>Initial order quantity is 10, unit price is 1,000 minor USD units and the requested delta is 3. Each application creates an incremental commitment of 3,000 minor units. The approval authorizes that operation once, with an authority limit of 20,000 minor units. The simulator validates payload/approval fields per request but deduplicates only by request key; it deliberately does not enforce business-operation uniqueness. The checker detects duplicated intent independently.</p>
+<p>The two files share <code>example-retry-template-v1</code> and must remain in the same development partition. <code>development_example</code> means they are outside the planned counted dataset until explicitly reviewed/adopted. Never use this public pair as held-out evidence. Runtime observations must replace revealing IDs with opaque tokens and strip mutation, expected-path, split and template metadata before suites receive them.</p></section></main></body></html>

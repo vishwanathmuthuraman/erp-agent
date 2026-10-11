@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1",
+  "case_id": "example-duplicate-retry-001",
+  "execution_status": "not_run",
+  "expected_only": true,
+  "ground_truth": {
+    "classification": "faulty",
+    "fault_class": "duplicate_execution",
+    "violated_rules": [
+      "STATE_UNIQUE_INTENT",
+      "STATE_TARGET_QUANTITY",
+      "STATE_COMMITMENT_TOTAL",
+      "TRACE_STABLE_RETRY_KEY"
+    ]
+  },
+  "expected_observation": {
+    "terminal_status": "completed",
+    "apply_attempts": 2,
+    "durable_operation_records": 2,
+    "commitment_records": 2,
+    "order_quantity": 16,
+    "commitment_total_minor": 6000,
+    "currency": "USD"
+  },
+  "expected_suite_verdicts": {
+    "smoke": "pass",
+    "state": "fail",
+    "hybrid": "fail"
+  },
+  "expected_findings": {
+    "smoke": [],
+    "state": [
+      "STATE_UNIQUE_INTENT",
+      "STATE_TARGET_QUANTITY",
+      "STATE_COMMITMENT_TOTAL"
+    ],
+    "hybrid": [
+      "STATE_UNIQUE_INTENT",
+      "STATE_TARGET_QUANTITY",
+      "STATE_COMMITMENT_TOTAL",
+      "TRACE_STABLE_RETRY_KEY"
+    ]
+  }
+}

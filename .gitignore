@@ -1,0 +1,39 @@
+# Local configuration and secrets; retain the reviewed dummy template.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+
+# Private source material and withheld evaluation data.
+private/
+raw-data/
+data/raw/
+data/private/
+
+# Runtime and generated working output. Review public release examples separately.
+artifacts/
+outputs/
+reports/generated/
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.db
+*.db-*
+*.log
+
+# Python/editor caches.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.DS_Store
+.idea/
+.vscode/

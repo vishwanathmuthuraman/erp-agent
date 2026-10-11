@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1",
+  "case_id": "example-clean-retry-001",
+  "execution_status": "not_run",
+  "expected_only": true,
+  "ground_truth": {
+    "classification": "clean",
+    "fault_class": "none",
+    "violated_rules": []
+  },
+  "expected_observation": {
+    "terminal_status": "completed",
+    "apply_attempts": 2,
+    "durable_operation_records": 1,
+    "commitment_records": 1,
+    "order_quantity": 13,
+    "commitment_total_minor": 3000,
+    "currency": "USD"
+  },
+  "expected_suite_verdicts": {
+    "smoke": "pass",
+    "state": "pass",
+    "hybrid": "pass"
+  },
+  "expected_findings": {
+    "smoke": [],
+    "state": [],
+    "hybrid": []
+  }
+}
