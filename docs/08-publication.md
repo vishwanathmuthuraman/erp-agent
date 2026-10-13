@@ -1,6 +1,6 @@
 # 08 — Public release and handoff
 
-The current deliverable is prepared for authorized public GitHub sharing as a documentation blueprint, not an application release. License selection is pending; no code, documentation or synthetic-data license grant is supplied. Do not publish screenshots, badges, pass rates or a working-demo claim until those artifacts actually exist. [Completion gates](05-definition-of-done.md).
+The current deliverable is prepared for authorized public GitHub sharing as a documentation blueprint, not an application release. Original code, documentation and synthetic fixtures are licensed under Apache-2.0; see LICENSE and NOTICE. Third-party material retains its own terms. Do not publish screenshots, badges, pass rates or a working-demo claim until those artifacts actually exist. [Completion gates](05-definition-of-done.md).
 
 ## Release checklist
 

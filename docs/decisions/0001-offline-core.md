@@ -10,7 +10,7 @@ Each repository owns its package; it imports no sibling project. SQLite backs lo
 
 ## Alternatives and consequences
 
-A web interface and service stack would add authentication, deployment and infrastructure work before these controls are trustworthy. Go/Rust services require a measured systems constraint; Rails would require a separate CRUD/service decision. None is introduced here. This choice does not establish throughput, production isolation or model quality. The maintainer reviews dependency changes through a lockfile diff and affected behavioral tests; installed dependency notices remain applicable. Project license selection is still pending.
+A web interface and service stack would add authentication, deployment and infrastructure work before these controls are trustworthy. Go/Rust services require a measured systems constraint; Rails would require a separate CRUD/service decision. None is introduced here. This choice does not establish throughput, production isolation or model quality. The maintainer reviews dependency changes through a lockfile diff and affected behavioral tests; installed dependency notices remain applicable. The original license decision was pending at the time of this ADR; the current Apache-2.0 decision is recorded in docs/09-licensing.md.
 
 The current `src/` package is an independently testable component. Future API/worker/UI applications may call or relocate it through a reviewed architecture decision. If superseded, preserve the tested arithmetic/contracts and document migration/rollback before changing service boundaries.
 
