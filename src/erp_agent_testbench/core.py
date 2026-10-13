@@ -3,7 +3,21 @@
 import copy
 import json
 import sqlite3
+from dataclasses import asdict, fields
 
+from .agent import (
+    AgentAdapter,
+    AgentInput,
+    AgentLimits,
+    AgentResult,
+    AmendmentRequest,
+    PublicApproval,
+    PublicOrder,
+    PublicPolicy,
+    PublicTask,
+    ReferenceRetryAdapter,
+    ToolObservation,
+)
 from .common import ContractError, canonical, digest, exact_integer, validate_shape
 
 
@@ -31,6 +45,7 @@ class Simulator:
         self.state = copy.deepcopy(state)
         self.limits = limits
         self.calls = 0
+        self.budget_exhausted = False
         self.events = []
         self.db = sqlite3.connect(":memory:", isolation_level=None)
         self.db.execute("PRAGMA foreign_keys=ON")
@@ -49,6 +64,27 @@ class Simulator:
         self.db.close()
 
     def apply(self, request, key, tick):
+        self._account_call(tick)
+        return self._apply(request, key, tick)
+
+    def apply_amendment(self, request: AmendmentRequest, key, tick):
+        self._account_call(tick)
+        return self._apply(asdict(request), key, tick)
+
+    def _account_call(self, tick):
+        # Count every invocation before serialization or validation can fail.
+        self.calls += 1
+        if (
+            self.budget_exhausted
+            or self.calls > self.limits["max_tool_calls"]
+            # Controller ticks cannot advance beyond the supported integer range.
+            or (type(tick) is int and tick > min(self.limits["max_ticks"], 2**63 - 1))
+        ):
+            self.budget_exhausted = True
+            raise ContractError("execution budget exhausted")
+        exact_integer(tick)
+
+    def _apply(self, request, key, tick):
         if set(request) != {
             "operation_id",
             "order_id",
@@ -60,10 +96,6 @@ class Simulator:
             raise ContractError("invalid amendment request fields")
         if request["order_id"] != self.state["order"]["order_id"]:
             raise ContractError("unknown order")
-        exact_integer(tick)
-        self.calls += 1
-        if self.calls > self.limits["max_tool_calls"] or tick > self.limits["max_ticks"]:
-            raise ContractError("execution budget exhausted")
         if not key or not isinstance(key, str):
             raise ContractError("idempotency key required")
         request_hash = digest(request)
@@ -153,6 +185,11 @@ def check_observation(observation):
             name: {"verdict": "inconclusive", "findings": [], "reason": "missing_evidence"}
             for name in ("smoke", "state", "hybrid")
         }
+    if observation["terminal_status"] == "incomplete":
+        return {
+            name: {"verdict": "inconclusive", "findings": [], "reason": "execution_incomplete"}
+            for name in ("smoke", "state", "hybrid")
+        }
     findings = []
     events = observation["events"]
     ids = [event["event_id"] for event in events]
@@ -186,7 +223,61 @@ def check_observation(observation):
     }
 
 
-def execute(case):
+def agent_input(case):
+    """Project a validated case onto explicit, immutable public records.
+
+    Do not copy the enclosing case/state dictionaries: their metadata belongs
+    to the controller. No case IDs, paths, hashes or schedule enter this view.
+    """
+
+    def project(record_type, source):
+        return record_type(**{field.name: source[field.name] for field in fields(record_type)})
+
+    task = case["public_task"]
+    state = case["initial_state"]
+    return AgentInput(
+        protocol_version="0.1",
+        task=project(
+            PublicTask,
+            {**task, "allowed_terminal_statuses": tuple(task["allowed_terminal_statuses"])},
+        ),
+        order=project(PublicOrder, state["order"]),
+        approval=project(PublicApproval, state["approval"]),
+        policy=project(PublicPolicy, state["policy"]),
+        limits=project(AgentLimits, case["limits"]),
+    )
+
+
+class _RetryTools:
+    """Controller-owned tool bridge; only public response values cross it."""
+
+    def __init__(self, simulator, first_tick):
+        self.__simulator = simulator
+        self.__first_tick = first_tick
+        self.__attempts = 0
+
+    def apply_amendment(self, request: AmendmentRequest, idempotency_key: str) -> ToolObservation:
+        tick = self.__first_tick + self.__attempts
+        self.__attempts += 1
+        result = self.__simulator.apply_amendment(request, idempotency_key, tick)
+        if self.__attempts == 1:
+            # Withhold the committed receipt. Unknown never implies rollback.
+            return ToolObservation("unknown")
+        return ToolObservation(
+            status=result["status"],
+            operation_id=result["operation_id"],
+            order_version=result["order_version"],
+        )
+
+
+class _NewKeyRetryAdapter(ReferenceRetryAdapter):
+    """Controller-selected defective specimen; no mutation switch in agent input."""
+
+    def _retry_key(self, original_key):
+        return "request-2"
+
+
+def execute(case, *, adapter: AgentAdapter | None = None):
     validate_case(case)
     if (
         case["disturbance"]["kind"] != "response_lost_after_commit"
@@ -196,30 +287,29 @@ def execute(case):
     mutation = case["mutation"]["kind"]
     if mutation not in {"none", "retry_new_idempotency_key"}:
         raise ContractError("mutant unsupported by initial retry slice")
+    if mutation != "none" and (
+        case["mutation"]["target"] != "reference_agent" or adapter is not None
+    ):
+        raise ContractError("retry mutant requires the built-in reference adapter")
+    if adapter is None:
+        adapter = _NewKeyRetryAdapter() if mutation != "none" else ReferenceRetryAdapter()
+    inputs = agent_input(case)
     simulator = Simulator(case["initial_state"], case["limits"])
     try:
         task = case["public_task"]
-        request = {
-            key: task[key]
-            for key in (
-                "operation_id",
-                "order_id",
-                "quantity_delta",
-                "unit_price_minor",
-                "currency",
-            )
-        }
-        request["approval_id"] = case["initial_state"]["approval"]["approval_id"]
-        tick = case["disturbance"]["tick"]
-        simulator.apply(request, "request-1", tick)
-        # The first response is deliberately withheld by the test controller.
-        simulator.apply(
-            request,
-            "request-2" if mutation == "retry_new_idempotency_key" else "request-1",
-            tick + 1,
-        )
+        result = adapter.run(inputs, _RetryTools(simulator, case["disturbance"]["tick"]))
+        # Catching a tool error cannot restore a controller-exhausted execution.
+        if simulator.budget_exhausted:
+            raise ContractError("execution budget exhausted")
+        if (
+            not isinstance(result, AgentResult)
+            or result.terminal_status
+            not in {"completed", "review_required", "failed", "incomplete"}
+            or result.operation_ids != (task["operation_id"],)
+        ):
+            raise ContractError("invalid agent result")
         observation = {
-            "terminal_status": "completed",
+            "terminal_status": result.terminal_status,
             "apply_attempts": simulator.calls,
             "durable_operation_records": simulator.db.execute(
                 "SELECT COUNT(*) FROM attempts"

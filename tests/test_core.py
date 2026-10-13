@@ -93,6 +93,96 @@ def test_budget_stops_retry(case):
         execute(case)
 
 
+def test_tick_budget_exhaustion_stops_later_writes_even_at_an_earlier_tick(case):
+    case["limits"]["max_ticks"] = 6
+    simulator = Simulator(case["initial_state"], case["limits"])
+    try:
+        request = request_for(case)
+        simulator.apply(request, "one", 5)
+        simulator.apply(request, "one", 6)
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(request, "one", 7)
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(request, "two", 6)
+        assert simulator.db.execute("SELECT quantity FROM orders").fetchone()[0] == 13
+        assert simulator.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0] == 1
+        assert simulator.db.execute("SELECT SUM(amount) FROM commitments").fetchone()[0] == 3000
+        assert [event["tick"] for event in simulator.events] == [5, 6]
+    finally:
+        simulator.close()
+
+
+@pytest.mark.parametrize("limit,value", [("max_tool_calls", 2), ("max_ticks", 6)])
+@pytest.mark.parametrize("rejection", ["unknown_order", "missing_field"])
+def test_rejected_requests_consume_budgets_and_cannot_resume(case, limit, value, rejection):
+    case["limits"][limit] = value
+    simulator = Simulator(case["initial_state"], case["limits"])
+    try:
+        request = request_for(case)
+        invalid_request = dict(request)
+        if rejection == "unknown_order":
+            invalid_request["order_id"] = "unknown-order"
+            error = "unknown order"
+        else:
+            invalid_request.pop("approval_id")
+            error = "invalid amendment request fields"
+        with pytest.raises(ContractError, match=error):
+            simulator.apply(invalid_request, "one", 5)
+        assert simulator.calls == 1
+        assert not simulator.budget_exhausted
+        assert simulator.db.execute("SELECT quantity FROM orders").fetchone()[0] == 10
+        assert simulator.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0] == 0
+        assert simulator.db.execute("SELECT COUNT(*) FROM commitments").fetchone()[0] == 0
+        assert simulator.events == []
+
+        # The rejected request consumes budget but does not prevent in-budget recovery.
+        assert simulator.apply(request, "one", 6)["status"] == "committed"
+        assert simulator.calls == 2
+        assert not simulator.budget_exhausted
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(invalid_request, "one", 7)
+        assert simulator.calls == 3
+        assert simulator.budget_exhausted
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(request, "two", 6)
+        assert simulator.calls == 4
+        assert simulator.db.execute("SELECT quantity FROM orders").fetchone()[0] == 13
+        assert simulator.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0] == 1
+        assert simulator.db.execute("SELECT COUNT(*) FROM commitments").fetchone()[0] == 1
+        assert simulator.db.execute("SELECT SUM(amount) FROM commitments").fetchone()[0] == 3000
+        assert [event["tick"] for event in simulator.events] == [6]
+    finally:
+        simulator.close()
+
+
+@pytest.mark.parametrize("max_tool_calls", [2, 20])
+def test_tick_overflow_consumes_budget_and_stops_later_writes(case, max_tool_calls):
+    last_tick = 2**63 - 1
+    case["initial_state"]["approval"]["valid_until_tick"] = last_tick
+    case["limits"].update(max_tool_calls=max_tool_calls, max_ticks=last_tick)
+    simulator = Simulator(case["initial_state"], case["limits"])
+    try:
+        request = request_for(case)
+        simulator.apply(request, "one", last_tick - 1)
+        simulator.apply(request, "one", last_tick)
+        assert simulator.calls == 2
+        assert not simulator.budget_exhausted
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(request, "two", last_tick + 1)
+        assert simulator.calls == 3
+        assert simulator.budget_exhausted
+        with pytest.raises(ContractError, match="execution budget exhausted"):
+            simulator.apply(request, "two", last_tick - 1)
+        assert simulator.calls == 4
+        assert simulator.db.execute("SELECT quantity FROM orders").fetchone()[0] == 13
+        assert simulator.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0] == 1
+        assert simulator.db.execute("SELECT COUNT(*) FROM commitments").fetchone()[0] == 1
+        assert simulator.db.execute("SELECT SUM(amount) FROM commitments").fetchone()[0] == 3000
+        assert [event["tick"] for event in simulator.events] == [last_tick - 1, last_tick]
+    finally:
+        simulator.close()
+
+
 def test_invalid_float_money_rejected(case):
     case["public_task"]["unit_price_minor"] = 1000.0
     with pytest.raises(ContractError):
