@@ -1,15 +1,25 @@
-# ERP Agent Testbench
+<p align="center"><img src="docs/assets/brand/logo.svg" width="88" height="88" alt="RetryHarbor logo"></p>
 
-![ERP Agent Testbench — Test the failure before it reaches the business.](docs/assets/overview.svg)
+# RetryHarbor — ERP agent reliability research
 
-[![Documentation integrity](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml)
+<p align="center"><img src="docs/assets/brand/banner.svg" width="100%" alt="RetryHarbor: Test the retry. Inspect the consequence. Retry simulation, Fault injection, State verification. Offline research components."></p>
+
 [![Implementation checks](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square)](pyproject.toml)
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-68b89b?style=flat-square)](LICENSE)
+[![Documentation integrity](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml)
+
+[Quick start](#run-the-initial-implementation) · [Implemented scope](docs/IMPLEMENTATION.md) · [Architecture](docs/02-architecture.md) · [Evaluation](docs/04-evaluation.md) · [Contribute](CONTRIBUTING.md)
+
+---
 
 **How does an agent behave when an ERP workflow retries, partially fails or changes its contract?**
 
 Define a simulated purchase-order interface, inject controlled faults, and distinguish successful completion from dangerous or misleading success.
 
 **Stage: initial offline implementation.** Runnable Python components, synthetic demos and behavioral tests are available. The complete workflow, predictive/model evaluation and production product remain pending.
+
+This is the public research project previously called **ERP Agent Testbench**. The repository URL, Python package and CLI commands remain unchanged.
 
 ## Run the initial implementation
 
@@ -114,4 +124,8 @@ See [contribution guidance](CONTRIBUTING.md) for useful review questions. Report
 
 This is a curated research repository. Internal delivery schedules and commercial planning are maintained separately. Public technical methods are deliberately inspectable; public availability does not imply production readiness.
 
-Maintained by [Vishwanath Muthuraman](https://github.com/vishwanathmuthuraman). Source material is cited; citations do not imply endorsement. License selection is pending, and no code, documentation or data license grant is supplied.
+Maintained by [Vishwanath Muthuraman](https://github.com/vishwanathmuthuraman). Source material is cited; citations do not imply endorsement. Original code, documentation and synthetic fixtures are licensed under Apache-2.0; see LICENSE and NOTICE. Third-party material retains its own terms.
+
+## License
+
+Original repository material is licensed under [Apache-2.0](LICENSE). See [licensing and attribution](docs/09-licensing.md) for scope, third-party material and distribution requirements.

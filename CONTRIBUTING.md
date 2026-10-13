@@ -7,6 +7,6 @@ The project is at the specification stage. Useful contributions challenge a requ
 3. Use original synthetic data. Do not include customer records, private correspondence, credentials, operational logs or copied reports.
 4. Preserve deterministic controls and the separation between expected answers and observed runs.
 5. Run `python scripts/check_public_docs.py` for documentation changes. Application changes require relevant behavioral tests once an implementation exists.
-6. Preserve attribution and explain sources and ownership. License terms are pending; discuss contribution terms before submitting substantial code or external assets.
+6. Preserve attribution and explain sources and ownership. Original contributions intentionally submitted for inclusion are under Apache-2.0 unless explicitly stated otherwise. You must have the rights to submit them; identify any third-party material and retain its required notices.
 
 Do not present a design proposal as a working feature or add outcome claims without matching reproducible evidence. Security-sensitive findings should use an available private reporting channel rather than a public issue containing exploit details or secrets.

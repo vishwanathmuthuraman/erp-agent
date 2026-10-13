@@ -13,4 +13,4 @@ Read README.md, ENGINEERING.md, requirements, architecture, evaluation and defin
 9. Run scripts/check_public_docs.py for documentation changes and the affected behavioral checks once application code exists. Documentation validation is not an application test.
 10. Follow docs/08-publication.md. A future architecture does not authorize connecting production systems, sending messages, financial actions, deployment or unrelated publication.
 
-Markdown is the editable source of truth. Existing public Git history remains historical evidence; normal file deletion does not erase prior access. License selection is pending.
+Markdown is the editable source of truth. Existing public Git history remains historical evidence; normal file deletion does not erase prior access. Original code, documentation and synthetic fixtures are licensed under Apache-2.0; see LICENSE and NOTICE. Third-party material retains its own terms.
