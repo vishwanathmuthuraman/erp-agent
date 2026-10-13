@@ -1,6 +1,6 @@
-# ERP Agent Testbench
+# RetryHarbor — ERP agent reliability research
 
-![ERP Agent Testbench — Test the failure before it reaches the business.](docs/assets/overview.svg)
+![RetryHarbor — Test the failure before it reaches the business.](docs/assets/overview.svg)
 
 [![Documentation integrity](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/docs.yml)
 [![Implementation checks](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml/badge.svg?branch=main)](https://github.com/vishwanathmuthuraman/erp-agent/actions/workflows/implementation.yml)
@@ -10,6 +10,8 @@
 Define a simulated purchase-order interface, inject controlled faults, and distinguish successful completion from dangerous or misleading success.
 
 **Stage: initial offline implementation.** Runnable Python components, synthetic demos and behavioral tests are available. The complete workflow, predictive/model evaluation and production product remain pending.
+
+This is the public research project previously called **ERP Agent Testbench**. The repository URL, Python package and CLI commands remain unchanged.
 
 ## Run the initial implementation
 
