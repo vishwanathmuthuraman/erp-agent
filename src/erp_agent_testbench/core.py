@@ -251,8 +251,9 @@ def agent_input(case):
 class _RetryTools:
     """Controller-owned tool bridge; only public response values cross it."""
 
-    def __init__(self, simulator, first_tick):
+    def __init__(self, simulator, first_tick, receipts):
         self.__simulator = simulator
+        self.__receipts = receipts
         self.__first_tick = first_tick
         self.__attempts = 0
 
@@ -263,6 +264,7 @@ class _RetryTools:
         if self.__attempts == 1:
             # Withhold the committed receipt. Unknown never implies rollback.
             return ToolObservation("unknown")
+        self.__receipts.append(result["operation_id"])
         return ToolObservation(
             status=result["status"],
             operation_id=result["operation_id"],
@@ -297,7 +299,8 @@ def execute(case, *, adapter: AgentAdapter | None = None):
     simulator = Simulator(case["initial_state"], case["limits"])
     try:
         task = case["public_task"]
-        result = adapter.run(inputs, _RetryTools(simulator, case["disturbance"]["tick"]))
+        receipts = []
+        result = adapter.run(inputs, _RetryTools(simulator, case["disturbance"]["tick"], receipts))
         # Catching a tool error cannot restore a controller-exhausted execution.
         if simulator.budget_exhausted:
             raise ContractError("execution budget exhausted")
@@ -308,6 +311,10 @@ def execute(case, *, adapter: AgentAdapter | None = None):
             or result.operation_ids != (task["operation_id"],)
         ):
             raise ContractError("invalid agent result")
+        # Durable state alone cannot back a completion claim; the adapter must
+        # have been shown a committed receipt for this operation.
+        if result.terminal_status == "completed" and task["operation_id"] not in receipts:
+            raise ContractError("completion claimed without receipt")
         observation = {
             "terminal_status": result.terminal_status,
             "apply_attempts": simulator.calls,

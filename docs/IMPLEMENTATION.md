@@ -118,6 +118,21 @@ Verification used Python **3.12.13**, Darwin, on the same uncommitted C04 workin
 
 Documentation verification: `.venv/bin/python scripts/check_public_docs.py` passed (9 JSON files, 62 relative links, 1 SVG; documentation only), and `git diff --check` passed. Clean wheel verification has not been repeated for this repair. Rejected requests still lack complete request/error events; structured execution error records, wall-clock enforcement, process isolation and the full workflow/evaluation remain pending.
 
+### C04 receipt-binding of completion claims
+
+A completed result is now accepted only if the controller-owned tool bridge actually delivered a committed receipt for the task operation to the adapter. Previously an adapter could call the tool once (response withheld as unknown, effect durable), never see a receipt, and claim `completed`, receiving passing suites from durable state alone. `execute` now raises `ContractError("completion claimed without receipt")` before suites run. Non-completion claims (for example `incomplete` after an unknown outcome) are unchanged and remain inconclusive. Receipt tracking lives in the controller and is not exposed to the adapter. Limit: this binds the claim to receipt delivery only; it does not verify the adapter's reasoning, and the in-process trust limits below still apply.
+
+Verification used the local `uv run --locked` environment on the working tree based on `db7d82a`. Starting suite: 80 tests. Commands actually run:
+
+| Command | Actual result |
+|---|---|
+| `uv run --locked pytest -q` | **84 passed, zero failed** (4 new: no-call and one-call completion rejected, two-call counterpart passes, incomplete claim stays inconclusive). |
+| `uv run --locked ruff check src tests` | Passed. |
+| `uv run --locked ruff format src tests` | Applied formatting to one file; rerun check follows with no remaining diffs. |
+| `uv run --locked python scripts/check_public_docs.py` | Passed (9 JSON files, 71 relative links, 3 SVG files; documentation only). |
+
+Clean wheel verification was not repeated for this change.
+
 ## Relationship to the full plan
 
 M1, M2 and M4 have partial component evidence; M3 has one seeded duplicate-retry defect only. M5 remains pending. Packaging covers this slice of M6.
