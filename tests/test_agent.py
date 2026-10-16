@@ -523,3 +523,40 @@ def test_invalid_adapter_result_is_an_error(case, result):
 
     with pytest.raises(ContractError, match="invalid agent result"):
         core.execute(case, adapter=BadResultAdapter())
+
+
+def _stub(calls, status="completed"):
+    class Stub:
+        def run(self, inputs, tools):
+            task = inputs.task
+            request = AmendmentRequest(
+                task.operation_id,
+                task.order_id,
+                task.quantity_delta,
+                task.unit_price_minor,
+                task.currency,
+                inputs.approval.approval_id,
+            )
+            for _ in range(calls):
+                tools.apply_amendment(request, "stub-key")
+            return AgentResult(status, (task.operation_id,))
+
+    return Stub()
+
+
+@pytest.mark.parametrize("calls", [0, 1])
+def test_completion_without_receipt_is_rejected(case, calls):
+    # With one call the effect is durable, but the receipt was withheld.
+    with pytest.raises(ContractError, match="without receipt"):
+        core.execute(case, adapter=_stub(calls))
+
+
+def test_completion_with_receipt_counterpart_passes(case):
+    result = core.execute(case, adapter=_stub(2))
+    assert all(row["verdict"] == "pass" for row in result["suites"].values())
+
+
+def test_incomplete_claim_without_receipt_remains_inconclusive(case):
+    result = core.execute(case, adapter=_stub(1, "incomplete"))
+    assert result["observation"]["durable_operation_records"] == 1
+    assert all(row["verdict"] == "inconclusive" for row in result["suites"].values())
